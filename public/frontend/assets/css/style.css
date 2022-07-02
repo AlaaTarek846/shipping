@@ -1,0 +1,213 @@
+
+
+body{
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    /* background-color: #3ba374; */
+    /* background-color: black; */
+    /* width:100vh;
+    height:100vh; */
+    font-family: 'hanimation';
+}
+
+.section-Download{
+
+    height:100vh;
+    background: #ede8e8;
+    /*background-image: linear-gradient(to right top, #ffffff, #ebdcf4, #e5b5dc, #e58ab6, #e15e83, #dc4a69, #d4354e, #c91f31, #c91f31, #c91f31, #c91f31, #c91f31);    !*background-image: linear-gradient(to right top, #bebebe, #a5a5a5, #8d8d8d, #767676, #5f5f5f, #525252, #454545, #383838, #313031, #2a2929, #232222, #1c1b1b);*!*/
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    align-items: center;
+    text-align: center;
+
+}
+.download-img{
+    width: 100%;
+    height: 100%;
+    text-align: center
+}
+.download-img a{
+    width: 100%;
+
+}
+.download-img a img{
+    width: 10% ;
+    position: relative;
+    animation: mymove 5s infinite alternate;
+    -webkit-animation: mymove 5s infinite alternate;
+    margin-left: 30px;
+}
+.download-btu a:hover
+{
+    background-color: #fff;
+    color   : #414141 ;
+}
+
+.download-btu a:hover i
+{
+    color : #414141 ;
+}
+
+
+
+@keyframes mymove {
+    from {top: -45px;}
+    to {top: 0px;}
+
+
+  }
+.download-btu{
+    text-align: center;
+}
+.download-btu a {
+    font-weight: 400;
+    padding: 10px 20px;
+    border: 2px solid #fff;
+    text-decoration: none;
+    color: #fff;
+    font-size: 30px;
+    transition: all .7s ;
+    border-radius: 8px;
+
+}
+.download-btu a i {
+    color: #ffff;
+    font-size: 30px;
+    margin-right: 10px;
+}
+.download-ul ul{
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+
+}
+.download-ul ul li{
+
+    margin-left: 8px;
+    padding: 10px;
+}
+.download-ul ul li a:hover
+{
+    background-color: #fff;
+
+    color   : #414141 ;
+}
+
+.download-ul ul li a:hover i
+{
+    color : #414141 ;
+}
+
+.download-ul ul li a{
+    text-decoration: none;
+    padding: 10px 10px 10px 10px;
+    border: 1px solid #fff;
+    border-radius: 20%;
+    -webkit-border-radius: 20%;
+    -moz-border-radius: 20%;
+    -ms-border-radius: 20%;
+    -o-border-radius: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.download-ul ul li a i{
+    font-size: 20px;
+    color: #fff;
+    text-align: center;
+
+}
+
+.logo-img{
+    width: 100%;
+    padding: 0;
+}
+.logo-img a img{
+    width: 50%;
+    /*position: absolute;*/
+    /*top: 20px;*/
+}
+.footer-text{
+    position:absolute ;
+    bottom: 0;
+    background-color: #fff;
+    width: 100%;
+
+}
+.download-text{
+text-align:center ;
+}
+
+.download-text ul{
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+
+}
+.download-text ul li{
+
+    margin-left: 8px;
+    padding: 10px;
+}
+.download-text ul li a{
+    text-decoration: none;
+    padding: 10px 15px 10px 15px;
+    color: #414141;
+    font-size: 25px;
+    font-weight: 600;
+
+}
+.download-text ul li a i{
+    font-size: 25px;
+    color: #414141;
+    text-align: center;
+    margin-right: 10px;
+
+}
+.download-text ul li a:hover{
+    color: #414141;
+}
+
+@media only screen and (max-width: 992px) {
+    .download-img a img{
+        width: 25% ;
+
+    }
+
+    .download-ul ul li{
+
+        margin-left: 0px;
+        padding: 3px;
+    }
+    .logo-img a img{
+        width: 40%;
+
+    }
+    .download-text ul{
+
+        display: flex;
+       flex-direction: column;
+
+    }
+    .download-text ul li a {
+
+        font-size: 19px;
+
+    }
+    .download-text ul li a i{
+        font-size: 22px;
+
+
+    }
+
+  }
