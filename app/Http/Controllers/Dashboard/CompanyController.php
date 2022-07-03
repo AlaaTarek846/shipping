@@ -23,7 +23,7 @@ class CompanyController extends Controller
     public function index_notification_company()
     {
         $user_id = auth()->user()->id;
-        $notification_company = Notification::where('user_id',$user_id)->with( 'user')->get();
+        $notification_company = Notification::where([['user_id',$user_id],['admin_id',$this->idAdmin()]])->with( 'user','admin')->get();
 
         return $this->returnData('notification_company', $notification_company, 'successfully');
     }
@@ -35,51 +35,76 @@ class CompanyController extends Controller
      */
     public function index()
     {
-          $companies = Company::with('user.userApiK','citie','branch','company_shipment_details','company_shipping_area_prices.area','branch','payment_type')->latest()->paginate(15);
+          $companies = Company::where('admin_id',$this->idAdmin())->with('user.userApiK','citie','branch','company_shipment_details','company_shipping_area_prices.area','branch','payment_type')->latest()->paginate(15);
         foreach ($companies as $company){
             $current_shipment = Shipment::where([
                 ['sender_id' , $company->user->id],
                 ['shipment_status_id' , 1 ],
+                ['admin_id',$this->idAdmin()]
             ])->orWhere([
                 ['sender_id' , $company->user->id],
                 ['shipment_status_id' , 2 ],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['sender_id' , $company->user->id],
                 ['shipment_status_id' , 3 ],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['sender_id' , $company->user->id],
                 ['shipment_status_id' , 4 ],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['sender_id' , $company->user->id],
                 ['shipment_status_id' , 5 ],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['sender_id' , $company->user->id],
                 ['shipment_status_id' , 6 ],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['sender_id' , $company->user->id],
                 ['shipment_status_id' , 12 ],
+                ['admin_id',$this->idAdmin()]
+
             ])->count();
 
             $value_of_shipment = Shipment::where([
                 ['shipment_status_id',2],
                 ['sender_id' , $company->user->id],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['shipment_status_id' , 3],
                 ['sender_id' , $company->user->id],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['shipment_status_id' , 4],
                 ['sender_id' , $company->user->id],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['shipment_status_id' , 5],
                 ['sender_id' , $company->user->id],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['shipment_status_id' , 6],
                 ['sender_id' , $company->user->id],
+                ['admin_id',$this->idAdmin()]
+
             ])->sum('shipping_price');
 
             $balance = CompanyShipmentDetails::where([
                 ['company_id',$company->id],
-                ['company_account_id',null]
+                ['company_account_id',null],
+                ['admin_id',$this->idAdmin()]
+
             ])->sum('shipment_price');
 
             $company->current_shipment = $current_shipment;
@@ -175,6 +200,7 @@ class CompanyController extends Controller
                 'phone' => $request->phone??null,
                 'city_id' => $request->city_id,
                 'branch_id' => $request->branch_id,
+                'admin_id' => $this->idAdmin(),
                 'photo' => $new_file,
 
             ]);
@@ -202,7 +228,7 @@ class CompanyController extends Controller
      */
     public function show($id)
     {
-        $company = Company::with('user')->findOrFail($id);
+        $company = Company::where('admin_id',$this->idAdmin())->with('user','admin')->findOrFail($id);
 
         return $this->returnData('company', $company, 'successfully');
 
@@ -223,7 +249,7 @@ class CompanyController extends Controller
 
         try {
 
-            $company = Company::findOrFail($id);
+            $company = Company::where('admin_id',$this->idAdmin())->findOrFail($id);
             $user_id = User::find($company->user_id);
 
             //      =================update validate on Table  Models User and Company
@@ -255,7 +281,7 @@ class CompanyController extends Controller
 
             //      =================update  photo  App\Models\Company
 
-            $company = Company::findOrFail($id);
+            $company = Company::where('admin_id',$this->idAdmin())->findOrFail($id);
             $name = $company->photo;
 
             if ($request->hasFile('photo')) {
@@ -289,6 +315,8 @@ class CompanyController extends Controller
             $company->phone = $request->phone??$company->phone;
             $company->city_id = $request->city_id??$company->city_id;
             $company->branch_id = $request->branch_id??$company->branch_id;
+            $company->admin_id = $this->idAdmin()??$company->admin_id;
+
 
 
             $company->update();
@@ -314,7 +342,7 @@ class CompanyController extends Controller
     {
 
 
-        $company = Company::find($id);
+        $company = Company::where('admin_id',$this->idAdmin())->find($id);
         if (count($company->storage_system) > 0 || count($company->offer) > 0 || count($company->weight_company) > 0 || count($company->company_account) > 0 || count($company->company_shipment_details) > 0 )
         {
             return response()->json("no deleted ");

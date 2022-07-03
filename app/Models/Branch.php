@@ -40,6 +40,12 @@ class Branch extends Model
 
         return $this->hasMany(Store::class,'branche_id');
     }
+    //    =======================Relation  One To Many   Model = admin = Many
+
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
 
     //    =======================Creat  Url  Photo
 

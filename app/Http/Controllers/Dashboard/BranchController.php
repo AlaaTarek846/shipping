@@ -21,7 +21,7 @@ class BranchController extends Controller
      */
     public function index()
     {
-        $branches = Branch::with('area')->get();
+        $branches = Branch::where('admin_id',$this->idAdmin())->with('area','admin')->get();
 
         return $this->returnData('branches', $branches, 'successfully');
     }
@@ -84,7 +84,7 @@ class BranchController extends Controller
      */
     public function show($id)
     {
-        $branch = Branch::findOrFail($id);
+        $branch = Branch::where('admin_id',$this->idAdmin())->with('area','admin')->findOrFail($id);
         return $this->returnData('branch', $branch, 'successfully');
 
     }
@@ -115,7 +115,7 @@ class BranchController extends Controller
 
             }
 
-            $branch = Branch::findOrFail($id);
+            $branch = Branch::where('admin_id',$this->idAdmin())->findOrFail($id);
 
             $name = $branch->photo;
 
@@ -150,7 +150,7 @@ class BranchController extends Controller
      */
     public function destroy($id)
     {
-        $branch = Branch::find($id);
+        $branch = Branch::where('admin_id',$this->idAdmin())->find($id);
 
         if (count($branch->store) > 0 || count($branch->employees) > 0 || count($branch->company) > 0 ){
 

@@ -27,6 +27,13 @@ class PackageController extends Controller
         return $this->returnData('package', $package, 'successfully');
     }
 
+    public function getpackage()
+    {
+        $package = Package::with('packageDetail')->get();
+
+        return $this->returnData('package', $package, 'successfully');
+    }
+
     /**
      * Store a newly created resource in storage.
      *

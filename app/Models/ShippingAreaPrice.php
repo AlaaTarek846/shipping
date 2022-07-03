@@ -25,4 +25,11 @@ class ShippingAreaPrice extends Model
         return $this->belongsTo(Province::class);
     }
 
+    //    =======================Relation  Admin User
+
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
+
 }

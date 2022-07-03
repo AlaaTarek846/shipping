@@ -23,7 +23,7 @@ class ShippingAreaPriceController extends Controller
      */
     public function index()
     {
-        $shipping_area_price = ShippingAreaPrice::with('area.province')->get();
+        $shipping_area_price = ShippingAreaPrice::where('admin_id',$this->idAdmin())->with('area.province','admin')->get();
 
         return $this->returnData('shippingareaprice', $shipping_area_price, 'successfully');
     }
@@ -52,11 +52,18 @@ class ShippingAreaPriceController extends Controller
             if ($validation->fails()) {
                 return $this->returnError('errors', $validation->errors());
             }
-            $shipping_area_price = ShippingAreaPrice::where("area_id",$request->area_id)->first();
+            $shipping_area_price = ShippingAreaPrice::where([["area_id",$request->area_id],['admin_id',$this->idAdmin()]])->first();
             if ($shipping_area_price){
                 return $this->returnError('errors', "this area already exist");
             }
-            $shipping_area_price = ShippingAreaPrice::create($request->all());
+            $shipping_area_price = ShippingAreaPrice::create([
+                'transportation_price' => $request->transportation_price,
+                'delivery_time' => $request->delivery_time,
+                'returned_time' => $request->returned_time,
+                'area_id' => $request->area_id,
+                'admin_id' => $this->idAdmin(),
+
+            ]);
 
             DB::commit();
 
@@ -79,7 +86,7 @@ class ShippingAreaPriceController extends Controller
      */
     public function show($id)
     {
-        $shipping_area_price = ShippingAreaPrice::findOrFail($id);
+        $shipping_area_price = ShippingAreaPrice::where('admin_id',$this->idAdmin())->findOrFail($id);
         return $this->returnData('shipping_area_price', $shipping_area_price, 'successfully');
 
     }
@@ -109,7 +116,7 @@ class ShippingAreaPriceController extends Controller
                 return response()->json($validation->errors(), 422);
             }
             if ($request->seve_for_all == 1) {
-                $province_area = Area::with('province')->find($request->area_id);
+                $province_area = Area::where('admin_id',$this->idAdmin())->with('province')->find($request->area_id);
                 $areas = $province_area->province->areas;
                 foreach ($areas as $area) {
                     if (count($area->shipping_area_price) > 0){
@@ -118,6 +125,8 @@ class ShippingAreaPriceController extends Controller
                             'transportation_price' => $request->transportation_price,
                             'delivery_time' => $request->delivery_time,
                             'returned_time' => $request->returned_time,
+                            'admin_id' => $this->idAdmin(),
+
                         ]);
                     }
 
@@ -125,7 +134,7 @@ class ShippingAreaPriceController extends Controller
 
             } else{
 
-                $shipping_area_price = ShippingAreaPrice::find($id);
+                $shipping_area_price = ShippingAreaPrice::where('admin_id',$this->idAdmin())->find($id);
 
                 $shipping_area_price->update([
 
@@ -133,6 +142,8 @@ class ShippingAreaPriceController extends Controller
                     'delivery_time' => $request->delivery_time,
                     'returned_time' => $request->returned_time,
                     'area_id' => $request->area_id,
+                    'admin_id' => $this->idAdmin(),
+
 
                 ]);
 
@@ -156,7 +167,7 @@ class ShippingAreaPriceController extends Controller
      */
     public function destroy($id)
     {
-        $shipping_area_price = ShippingAreaPrice::find($id);
+        $shipping_area_price = ShippingAreaPrice::where('admin_id',$this->idAdmin())->find($id);
 
 
         $shipping_area_price->destroy($id);

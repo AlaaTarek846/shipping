@@ -78,7 +78,7 @@ class ProvinceController extends Controller
      */
     public function show($id)
     {
-        $province = Province::with('country','admin')->findOrFail($id);
+        $province = Province::where('admin_id',$this->idAdmin())->with('country','admin')->findOrFail($id);
         return $this->returnData('province',$province, 'successfully');
     }
 
@@ -124,7 +124,7 @@ class ProvinceController extends Controller
      */
     public function destroy($id)
     {
-        $province = Province::findOrFail($id);
+        $province = Province::where('admin_id',$this->idAdmin())->findOrFail($id);
 
 
         if (count($province->areas) > 0)

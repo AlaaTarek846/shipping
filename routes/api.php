@@ -127,6 +127,12 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
 
     Route::post('dashboard/update-PackageUser/{id}', [PackageUserController::class, 'update']);
 
+    Route::get('dashboard/all-Package', [PackageController::class, 'getpackage']);
+
+
+
+
+
 /*=========
   * *= Start Rout  Ligon Dashboard
 */
@@ -545,7 +551,6 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
 
 
         /*===  Start Rout  Admin User    ====*/
-        Route::get('all-PackageUser', [PackageUserController::class, 'index']);
 
 
 

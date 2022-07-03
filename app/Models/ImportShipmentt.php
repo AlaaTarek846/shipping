@@ -12,4 +12,13 @@ class ImportShipmentt extends Model
     //    =======================Models ImportShipmentt Fields
 
     protected $guarded = ['id'];
+
+    //    =======================Relation  Admin User
+
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
+
+
 }

@@ -20,6 +20,12 @@ class StorageSystem extends Model
         return $this->belongsToMany(Company::class,'storage_system_companies','storage_system_id','company_id');
 
     }
+    //    =======================Relation  Admin User
+
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
 
 
 

@@ -20,4 +20,5 @@ class TransportType extends Model
         return $this->hasMany(PickUp::class);
     }
 
+
 }

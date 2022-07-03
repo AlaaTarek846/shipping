@@ -54,4 +54,11 @@ class Store extends Model
 
         return $this->hasMany(Stock::class);
     }
+
+    //    =======================Relation  Admin User
+
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
 }

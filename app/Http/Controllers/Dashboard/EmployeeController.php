@@ -22,7 +22,7 @@ class EmployeeController extends Controller
      */
     public function index()
     {
-        $employees = Employee::with('branch','department','user.roles','job','shipmenttransfer')->latest()->paginate(15);
+        $employees = Employee::where('admin_id',$this->idAdmin())->with('branch','department','user.roles','job','shipmenttransfer','admin')->latest()->paginate(15);
 
         return $this->returnData('employees', $employees, 'successfully');
     }
@@ -131,6 +131,7 @@ class EmployeeController extends Controller
                 'salary' => $request->salary,
                 'wallet' => $request->wallet,
                 'commission' => $request->commission,
+                'admin_id' => $this->idAdmin(),
                 'photo' => $new_file,
                 'cv' => $new2_file,
                 'face_ID_card_pic' => $new3_file,
@@ -158,7 +159,7 @@ class EmployeeController extends Controller
      */
     public function show($id)
     {
-        $employee = Employee::with('branch','department','user','job','shipmenttransfer')->findOrFail($id);
+        $employee = Employee::where('admin_id',$this->idAdmin())->with('branch','department','user','job','shipmenttransfer','admin')->findOrFail($id);
 
             return $this->returnData('employee', $employee, 'successfully');
 
@@ -176,7 +177,7 @@ class EmployeeController extends Controller
         DB::beginTransaction();
 
         try {
-            $employee = Employee::findOrFail($id);
+            $employee = Employee::where('admin_id',$this->idAdmin())->findOrFail($id);
             $user_id = User::find($employee->user_id);
 
             //      =================update validate on Table  Models User and Employee
@@ -205,7 +206,7 @@ class EmployeeController extends Controller
                 return $this->returnError('errors', $validation->errors());
             }
 
-            $employee = Employee::find($id);
+            $employee = Employee::where('admin_id',$this->idAdmin())->find($id);
             $name = $employee->photo;
             $name2 = $employee->cv;
             $name3 = $employee->face_ID_card_pic;
@@ -275,6 +276,7 @@ class EmployeeController extends Controller
             $employee->branch_id = $request->branch_id??$employee->branch_id;
             $employee->job_id = $request->job_id??$employee->job_id;
             $employee->city_id = $request->city_id??$employee->city_id;
+            $employee->admin_id = $this->idAdmin()??$employee->admin_id;
 
 
             $employee->update();
@@ -296,7 +298,7 @@ class EmployeeController extends Controller
      */
     public function destroy($id)
     {
-        $employee = Employee::find($id);
+        $employee = Employee::where('admin_id',$this->idAdmin())->find($id);
 
         if (count($employee->shipmenttransfer) > 0){
 

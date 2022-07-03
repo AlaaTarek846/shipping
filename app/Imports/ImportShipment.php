@@ -3,12 +3,15 @@
 namespace App\Imports;
 
 use App\Models\ImportShipmentt;
+use App\Traits\GeneralTrait;
 use Illuminate\Database\Eloquent\Model;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Facades\Validator;
 class ImportShipment implements ToModel, WithHeadingRow
 {
+    use GeneralTrait;
+
     /**
      * @param array $row
      *
@@ -60,6 +63,9 @@ class ImportShipment implements ToModel, WithHeadingRow
                 'notes' => $row['notes'],
                 'service_types' => $row['service_types'],
                 'additional_service' => $row['additional_service'],
+                'admin_id' => $this->idAdmin(),
+
+
             ]);
         }else{
             return;

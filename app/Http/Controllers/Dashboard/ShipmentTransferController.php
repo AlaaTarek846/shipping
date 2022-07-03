@@ -63,6 +63,7 @@ class ShipmentTransferController extends Controller
                     'employee_id' => $data_transfer['employee_id']??null,
                     'store_end_id' => $data_transfer['store_end_id']??null,
                     'notes' => $data_transfer['notes']??null,
+                    'notes' => $data_transfer['notes']??null,
                 ]);
             }
 

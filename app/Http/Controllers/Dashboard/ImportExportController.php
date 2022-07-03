@@ -52,7 +52,7 @@ class ImportExportController extends Controller
 
             Excel::import(new ImportShipment, $request->file('file'));
 
-            $importshipmentt = ImportShipmentt::where('end', 0)->get();
+            $importshipmentt = ImportShipmentt::where([['end', 0],[]])->get();
             // return $importshipmentt;
 
 
@@ -61,7 +61,7 @@ class ImportExportController extends Controller
                 foreach ($importshipmentt as $import) {
 
 
-                    $client = Client::where('phone', $import['phone'])->first();
+                    $client = Client::where([['phone', $import['phone']],[$this->idAdmin()]])->first();
 
                     if ($client) {
 
@@ -71,6 +71,8 @@ class ImportExportController extends Controller
                             'phone' => $import['phone'],
                             'phone_2' => $import['phone_2'],
                             'email_2' => $import['email'],
+                            'admin_id' => $this->idAdmin(),
+
                         ]);
 
                     } else {
@@ -81,19 +83,21 @@ class ImportExportController extends Controller
                             'phone' => $import['phone'],
                             'phone_2' => $import['phone_2'],
                             'email_2' => $import['email'],
+                            'admin_id' => $this->idAdmin(),
+
                         ]);
 
                     }
 
+//                    where('admin_id',$this->idAdmin())->
+                    $area = Area::where([['name', $import['area']],['admin_id', $import[$this->idAdmin()]]])->first();
 
-                    $area = Area::where('name', $import['area'])->first();
-
-                    $service = ServiceType::where('type', $import['service_types'])->first();
+                    $service = ServiceType::where([['type', $import['service_types']],['admin_id', $import[$this->idAdmin()]]])->first();
 //                    return $service;
 
                     if ($import['additional_service'] != null){
 
-                        $additional_service_type = AdditionalService::where('type', $import['additional_service'])->first()->id;
+                        $additional_service_type = AdditionalService::where([['type', $import['additional_service']],['admin_id', $import[$this->idAdmin()]]])->first()->id;
 
                     }else{
 
@@ -101,7 +105,7 @@ class ImportExportController extends Controller
                     }
 
                     //      ================= calculator  AdditionalService
-                    $additional_service = AdditionalService::where('type',$import['additional_service'])->first();
+                    $additional_service = AdditionalService::where([['type',$import['additional_service']],['admin_id', $import[$this->idAdmin()]]])->first();
 
                     $price_additional_service =0;
                     if($additional_service){
@@ -111,10 +115,10 @@ class ImportExportController extends Controller
 
                     //      ================= calculator  weight
 
-                    $weight = Weight::first();
+                    $weight = Weight::where('admin_id', $this->idAdmin())->first();
 
 
-                    $weight_company = WeightCompany::where('company_id',$user_id)->first();
+                    $weight_company = WeightCompany::where([['company_id',$user_id],['admin_id', $this->idAdmin()]])->first();
                     $weight_price = 0;
 
                     if ($weight_company){
@@ -131,9 +135,9 @@ class ImportExportController extends Controller
 
                     //      ================= calculator  shipping price
 
-                    $shipping_area_price = ShippingAreaPrice::where('area_id',$area->id)->first();
+                    $shipping_area_price = ShippingAreaPrice::where([['area_id',$area->id],['admin_id', $this->idAdmin()]])->first();
 
-                    $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id',$user_id],['area_id',$area->id]])->first();
+                    $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id',$user_id],['area_id',$area->id],['admin_id', $this->idAdmin()]])->first();
 
                     $transportation_price_shipping = 0;
 
@@ -171,6 +175,8 @@ class ImportExportController extends Controller
                         'sender_id' => $user_id,
                         'shipment_status_id' =>1,
                         'shipping_price' => $shipping_price,
+                        'admin_id' => $this->idAdmin(),
+
 
 
                     ]);

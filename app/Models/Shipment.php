@@ -111,6 +111,12 @@ class Shipment extends Model
         return $this->belongsTo(User::class,'sender_id');
 
     }
+    //    =======================Relation  Admin User
+
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
 
     //    =======================Relation  One To Many   Model = Map = Many
 

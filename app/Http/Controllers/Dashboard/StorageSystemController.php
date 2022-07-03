@@ -20,7 +20,7 @@ class StorageSystemController extends Controller
      */
     public function index()
     {
-        $storage_system  = StorageSystem::with('company')->get();
+        $storage_system  = StorageSystem::where('admin_id',$this->idAdmin())->with('company','admin')->get();
 
         return $this->returnData('storage_system', $storage_system, 'successfully');
     }
@@ -43,7 +43,12 @@ class StorageSystemController extends Controller
             {
                 return $this->returnError('errors', $validation->errors());
             }
-            $storage_system = new StorageSystem($request->all());
+            $storage_system = new StorageSystem([
+                'title' => $request->title,
+                'description' => $request->description,
+                'admin_id' => $this->idAdmin(),
+
+            ]);
             $storage_system->save();
             return $this->returnData('storage_system', $storage_system, 'successfully');
 
@@ -61,7 +66,7 @@ class StorageSystemController extends Controller
      */
     public function show($id)
     {
-        $storage_system = StorageSystem::findOrFail($id);
+        $storage_system = StorageSystem::where('admin_id',$this->idAdmin())->findOrFail($id);
         return $storage_system;
     }
 
@@ -84,8 +89,12 @@ class StorageSystemController extends Controller
             {
                 return $this->returnError('errors', $validation->errors());
             }
-            $storage_system = StorageSystem::findOrFail($id);
-            $storage_system->update($request->all());
+            $storage_system = StorageSystem::where('admin_id',$this->idAdmin())->findOrFail($id);
+            $storage_system->title = $request->title??$storage_system->title;
+            $storage_system->description = $request->description??$storage_system->description;
+            $storage_system->admin_id = $this->idAdmin()??$this->idAdmin();
+            $storage_system->update();
+
 
             return $this->returnData('storage_system', $storage_system, 'successfully');
 
@@ -104,7 +113,7 @@ class StorageSystemController extends Controller
      */
     public function destroy($id)
     {
-        $storage_system = StorageSystem::findOrFail($id);
+        $storage_system = StorageSystem::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         if (count($storage_system->provinces) > 0)
         {

@@ -37,10 +37,11 @@ class ShipmentController extends Controller
         $RepresentativeAccountDetail = RepresentativeAccountDetail::where([
             ['representative_account_id', "!=", NULL],
             ['representative_id', $id],
+            ['admin_id',$this->idAdmin()]
         ])->get()->pluck('shipment_id')->toArray();
 
         $shipment = Shipment::with('area', 'client', 'representative', 'serviceType', 'shipmentstatu', 'additionalservice', 'store', 'user')
-            ->where('representative_id', $id)->whereNotIn('id', $RepresentativeAccountDetail)->get();
+            ->where([['representative_id', $id],['admin_id',$this->idAdmin()]])->whereNotIn('id', $RepresentativeAccountDetail)->get();
 
 
         return $this->returnData('shipment', $shipment, 'successfully');
@@ -65,6 +66,8 @@ class ShipmentController extends Controller
                 $q->when($request->date, function ($q) {
                     $q->whereDate('created_at', now()->format('Y-m-d'));
                 });
+            })->where(function ($q)  {
+                $q->where('admin_id',$this->idAdmin());
             })
             ->where(function ($q) use ($request) {
                 $q->when($request->start_date && $request->end_date, function ($q) use ($request) {
@@ -106,8 +109,8 @@ class ShipmentController extends Controller
 
             })
             ->latest()->paginate(20);
-        $count_shipment = Shipment::count();
-        $total_cod = Shipment::get()->sum('total_shipment');
+        $count_shipment = Shipment::where('admin_id',$this->idAdmin())->count();
+        $total_cod = Shipment::where('admin_id',$this->idAdmin())->get()->sum('total_shipment');
 
         $data['shipment'] = $shipment;
         $data['count_shipment'] = $count_shipment;
@@ -122,7 +125,7 @@ class ShipmentController extends Controller
 
     public function shipment_area($id)
     {
-        $provinces = Province::all();
+        $provinces = Province::where('admin_id',$this->idAdmin())->get();
         $data = [];
         $data_area = [];
         foreach ($provinces as $index => $province) {
@@ -205,7 +208,7 @@ class ShipmentController extends Controller
             }
             //      =================App\Models\Client
 
-            $client = Client::create([
+            $client = Client::where('admin_id',$this->idAdmin())->create([
 
                 'name' => $request->name,
                 'email_2' => $request->email_2,
@@ -217,7 +220,7 @@ class ShipmentController extends Controller
 
             ]);
             //      ================= calculator  AdditionalService
-            $additional_service = AdditionalService::where('id', $request->additional_service_id)->first();
+            $additional_service = AdditionalService::where([['id', $request->additional_service_id],['admin_id',$this->idAdmin()]])->first();
 
             $price_additional_service = 0;
             if ($additional_service) {
@@ -227,9 +230,9 @@ class ShipmentController extends Controller
 
             //      ================= calculator  weight
 
-            $weight = Weight::first();
+            $weight = Weight::where('admin_id',$this->idAdmin())->first();
 
-            $weight_company = WeightCompany::where('company_id', $request->sender_id)->first();
+            $weight_company = WeightCompany::where([['company_id', $request->sender_id],['admin_id',$this->idAdmin()]])->first();
             $weight_price = 0;
 
             if ($weight_company) {
@@ -244,8 +247,8 @@ class ShipmentController extends Controller
 
             //      ================= calculator  shipping price
 
-            $shipping_area_price = ShippingAreaPrice::where('area_id', $request->area_id)->first();
-            $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id', $request->sender_id], ['area_id', $request->area_id]])->first();
+            $shipping_area_price = ShippingAreaPrice::where([['area_id', $request->area_id],['admin_id',$this->idAdmin()]])->first();
+            $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id', $request->sender_id], ['area_id', $request->area_id],['admin_id',$this->idAdmin()]])->first();
             $transportation_price_shipping = 0;
 
             if ($company_shipping_area_price) {
@@ -281,6 +284,8 @@ class ShipmentController extends Controller
                 'store_id' => $request->store_id,
                 'additional_service_id' => $request->additional_service_id,
                 'reason_id' => $request->reason_id,
+                'admin_id' => $this->idAdmin(),
+
 
             ]);
             $shipment->area;
@@ -314,7 +319,7 @@ class ShipmentController extends Controller
      */
     public function show($id)
     {
-        $shipment = Shipment::with('area', 'client', 'representative', 'serviceType', 'shipmentstatu', 'additionalservice', 'store', 'user')->findOrFail($id);
+        $shipment = Shipment::where('admin_id',$this->idAdmin())->with('area', 'client', 'representative', 'serviceType', 'shipmentstatu', 'additionalservice', 'store', 'user','admin')->findOrFail($id);
 
         return $this->returnData('shipment', $shipment, 'successfully');
     }
@@ -341,8 +346,8 @@ class ShipmentController extends Controller
 //                $request->merge([$key => $value =="undefined" ? null : $value]);
 
             //      =================update validate on Table  Models User and Client
-            $shipment = Shipment::findOrFail($id);
-            $client = Client::find($shipment->client_id);
+            $shipment = Shipment::where('admin_id',$this->idAdmin())->findOrFail($id);
+            $client = Client::where('admin_id',$this->idAdmin())->find($shipment->client_id);
 //
 //            if($shipment->shipment_status_id == 1 || $shipment->shipment_status_id == 12 ){
             $validation = Validator::make($request->all(), [
@@ -432,7 +437,7 @@ class ShipmentController extends Controller
 
             $client->update();
             //      ================= calculator  AdditionalService
-            $additional_service = AdditionalService::where('id', $request->additional_service_id)->first();
+            $additional_service = AdditionalService::where([['id', $request->additional_service_id],['admin_id',$this->idAdmin()]])->first();
 
             $price_additional_service = 0;
             if ($additional_service) {
@@ -442,9 +447,9 @@ class ShipmentController extends Controller
 
             //      ================= calculator  weight
 
-            $weight = Weight::first();
+            $weight = Weight::where('admin_id',$this->idAdmin())->first();
 
-            $weight_company = WeightCompany::where('company_id', $request->sender_id)->first();
+            $weight_company = WeightCompany::where([['company_id', $request->sender_id],['admin_id',$this->idAdmin()]])->first();
             $weight_price = 0;
 
             if ($weight_company) {
@@ -459,7 +464,7 @@ class ShipmentController extends Controller
 
             //      ================= calculator  shipping price
 
-            $shipping_area_price = ShippingAreaPrice::where('area_id', $request->area_id)->first();
+            $shipping_area_price = ShippingAreaPrice::where([['area_id', $request->area_id],['admin_id',$this->idAdmin()]])->first();
             $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id', $request->sender_id], ['area_id', $request->area_id]])->first();
             $transportation_price_shipping = 0;
 
@@ -492,6 +497,8 @@ class ShipmentController extends Controller
             $shipment->shipment_status_id = $request->shipment_status_id ?? $shipment->shipment_status_id;
             $shipment->additional_service_id = $request->additional_service_id ?? $shipment->additional_service_id;
             $shipment->reason_id = $request->reason_id ?? $shipment->reason_id;
+            $shipment->admin_id = $this->idAdmin()??$shipment->admin_id;
+
 
             $shipment->update();
             if ($shipment->shipment_status_id == 2) {
@@ -603,12 +610,13 @@ class ShipmentController extends Controller
                 $RepresentativeAccountDetail = RepresentativeAccountDetail::where([
                     ['representative_account_id', NULL],
                     ['shipment_id', $shipment_id],
+                    ['admin_id',$this->idAdmin()]
                 ])->first();
 
 
                 if ($RepresentativeAccountDetail) {
 
-                    $shipment = Shipment::find($shipment_id);
+                    $shipment = Shipment::where('admin_id',$this->idAdmin())->find($shipment_id);
                     $shipment->update([
 
                         'representative_id' => $request->representative_id,
@@ -616,10 +624,10 @@ class ShipmentController extends Controller
                     ]);
 
                 } else {
-                    $shipment = RepresentativeAccountDetail::find($shipment_id);
+                    $shipment = RepresentativeAccountDetail::where('admin_id',$this->idAdmin())->find($shipment_id);
 
                     if (!$shipment) {
-                        $shipment = Shipment::find($shipment_id);
+                        $shipment = Shipment::where('admin_id',$this->idAdmin())->find($shipment_id);
                         if ($shipment) {
                             $shipment->update([
                                 'representative_id' => $request->representative_id,
@@ -650,7 +658,7 @@ class ShipmentController extends Controller
      */
     public function destroy($id)
     {
-        $shipment = Shipment::find($id);
+        $shipment = Shipment::where('admin_id',$this->idAdmin())->find($id);
 
         if (count($shipment->shipmenttransfer) > 0 || count($shipment->stock_detail) > 0 || count($shipment->company_shipment_details) > 0 || count($shipment->representative_account_detail) > 0) {
             return response()->json("no delete", 400);

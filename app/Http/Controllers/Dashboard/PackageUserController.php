@@ -159,7 +159,7 @@ class PackageUserController extends Controller
 //                return response()->json($validation->errors(), 422);
             }
             $user_auth = user::whereDate('package_date','<=',now()->format('Y-m-d'))->where('email',$request->email)
-                ->orWhere('phone_number',$request->phone_number)
+                ->where('phone_number',$request->phone_number)
                 ->first();
 
             if($user_auth){
@@ -198,7 +198,7 @@ class PackageUserController extends Controller
 
 
 
-                return $this-> returnError('مشترك من فبل هنا تسجيل مشترك جديد فقط','0','0');
+                return $this-> returnError('','0','0');
 
 
             }

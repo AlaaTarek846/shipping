@@ -20,7 +20,7 @@ class StoreController extends Controller
      */
     public function index()
     {
-        $store = Store::with('branch','employee')->get();
+        $store = Store::with('branch','employee','admin')->where('admin_id',$this->idAdmin())->get();
 
         return $this->returnData('store', $store, 'successfully');
     }
@@ -49,7 +49,15 @@ class StoreController extends Controller
                 return $this->returnError('errors', $validation->errors());
 
             }
-            $store = new Store($request->all());
+            $store = new Store([
+                'name' => $request->name,
+                'address' => $request->address,
+                'phone' => $request->phone,
+                'branche_id' => $request->branche_id,
+                'employee_id' => $request->employee_id,
+                'admin_id' => $this->idAdmin(),
+
+            ]);
 
 
             $store->save();
@@ -70,7 +78,7 @@ class StoreController extends Controller
      */
     public function show($id)
     {
-        $store = Store::findOrFail($id);
+        $store = Store::with('branch','employee','admin')->where('admin_id',$this->idAdmin())->whfindOrFail($id);
         return $this->returnData('store', $store, 'successfully');
 
     }
@@ -98,12 +106,15 @@ class StoreController extends Controller
 
             }
 
-            $store = Store::findOrFail($id);
-
-            $store->update($request->all());
-
-
+            $store = Store::where('admin_id',$this->idAdmin())->findOrFail($id);
+            $store->name = $request->name??$store->name;
+            $store->address = $request->address??$store->address;
+            $store->branche_id = $request->branche_id??$store->branche_id;
+            $store->phone = $request->phone??$store->phone;
+            $store->employee_id = $request->employee_id??$store->employee_id;
+            $store->admin_id = $this->idAdmin()??$this->idAdmin();
             $store->update();
+
             return $this->returnData('store', $store, 'successfully');
 
         } catch (\Exception $e) {
@@ -120,7 +131,7 @@ class StoreController extends Controller
      */
     public function destroy($id)
     {
-        $store = Store::find($id);
+        $store = Store::where('admin_id',$this->idAdmin())->find($id);
 
         if (count($store->shipment) > 0 || count($store->shipmenttransfer) > 0 || count($store->employee) > 0 || count($store->stock) > 0 ){
             return response()->json("no deleted ");

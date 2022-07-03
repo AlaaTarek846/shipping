@@ -90,7 +90,7 @@ class DepartmentController extends Controller
                 return $this->returnError('errors', $validation->errors());
 
             }
-            $department = Department::findOrFail($id);
+            $department = Department::where('admin_id',$this->idAdmin())->findOrFail($id);
             $department->update($request->all());
             return $this->returnData('department', $department, 'successfully');
 
@@ -108,7 +108,7 @@ class DepartmentController extends Controller
      */
     public function destroy($id)
     {
-        $department = Department::findOrFail($id);
+        $department = Department::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         if (count($department->employees) > 0)
         {

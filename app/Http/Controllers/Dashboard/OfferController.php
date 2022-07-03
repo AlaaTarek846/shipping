@@ -21,7 +21,7 @@ class OfferController extends Controller
     public function index()
     {
 
-        $offer  = Offer::with('company')->get();
+        $offer  = Offer::where('admin_id',$this->idAdmin())->with('company','admin')->get();
 
         return $this->returnData('offer', $offer, 'successfully');
     }
@@ -45,7 +45,11 @@ class OfferController extends Controller
             {
                 return $this->returnError('errors', $validation->errors());
             }
-            $offer = new Offer($request->all());
+            $offer = new Offer([
+                'title' => $request->title,
+                'admin_id' => $this->idAdmin(),
+
+            ]);
             $offer->save();
             return $this->returnData('offer', $offer, 'successfully');
 
@@ -63,7 +67,7 @@ class OfferController extends Controller
      */
     public function show($id)
     {
-        $offer = Offer::findOrFail($id);
+        $offer = Offer::where('admin_id',$this->idAdmin())->findOrFail($id);
         return $offer;
     }
 
@@ -85,8 +89,10 @@ class OfferController extends Controller
             {
                 return $this->returnError('errors', $validation->errors());
             }
-            $offer = Offer::findOrFail($id);
-            $offer->update($request->all());
+            $offer = Offer::where('admin_id',$this->idAdmin())->findOrFail($id);
+            $offer->title = $request->title??$storage_system->title;
+            $offer->admin_id = $this->idAdmin()??$this->idAdmin();
+            $offer->update();
 
             return $this->returnData('offer', $offer, 'successfully');
 

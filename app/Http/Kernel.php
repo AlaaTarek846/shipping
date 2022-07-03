@@ -69,6 +69,7 @@ class Kernel extends HttpKernel
         'client' => \App\Http\Middleware\Client::class,
         'representative' => \App\Http\Middleware\Representative::class,
         'company' => \App\Http\Middleware\Company::class,
+        'language' => \App\Http\Middleware\ChanggeLanguage::class,
 
 
 
