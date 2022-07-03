@@ -45,11 +45,14 @@ class JobController extends Controller
                 return $this->returnError('errors', $validation->errors());
 
             }
+//            $arr=explode(',',$request->name);
+
             $job = new Job([
                 'name' => $request->name,
                 'admin_id' => $this->idAdmin(),
 
             ]);
+
             $job->save();
             return $this->returnData('job', $job, 'successfully');
 

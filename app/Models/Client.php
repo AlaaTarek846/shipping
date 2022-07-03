@@ -19,6 +19,11 @@ class Client extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
+
     //    =======================Relation  One To Many   Model = Citie = One
 
     public function citie(){

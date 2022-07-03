@@ -26,6 +26,12 @@ class Company extends Model
 
         return $this->belongsTo(Citie::class,'city_id');
     }
+    //    =======================Relation  Employee User
+
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
 
    //    =======================Relation  One To Many  Model = CompanyShippingAreaPrice = One
 

@@ -52,7 +52,24 @@ class AuthUserMobileController extends Controller
             return response()->json($validator->errors(), 422);
         }
         $user_phone = User::where('phone_number', $request->phone_number)->first();
+
         if ($user_phone) {
+
+            if($user_phone->user_type == "admin" && $user_phone->package_date <= now()->format('Y-m-d') && $user_phone->is_active == 0) {
+                return response()->json("not active admin");
+            }elseif($user_phone->user_type == "client" && $user_phone->client->admin->user->package_date <= now()->format('Y-m-d') && $user_phone->client->admin->user->is_active == 0){
+                return response()->json("not active client");
+
+            }elseif($user_phone->user_type == "representative" && $user_phone->representative->admin->user->package_date <= now()->format('Y-m-d') && $user_phone->representative->admin->user->is_active == 0){
+                return response()->json("not active representative");
+
+            }elseif($user_phone->user_type == "employee" && $user_phone->employee->admin->user->package_date <= now()->format('Y-m-d') && $user_phone->employee->admin->user->is_active == 0){
+                return response()->json("not active employee");
+
+            }elseif($user_phone->user_type == "company" && $user_phone->company->admin->user->package_date <= now()->format('Y-m-d') && $user_phone->company->admin->user->is_active == 0){
+                return response()->json("not active company");
+
+            }
 
             if (Hash::check($request->password, $user_phone->password)) {
 
@@ -94,7 +111,24 @@ class AuthUserMobileController extends Controller
             return response()->json($validator->errors(), 422);
         }
         $user_phone = User::where('phone_number', $request->phone_number)->first();
+
         if ($user_phone) {
+
+            if($user_phone->user_type == "admin" && $user_phone->package_date <= now()->format('Y-m-d') && $user_phone->is_active == 0) {
+                return response()->json("not active admin");
+            }elseif($user_phone->user_type == "client" && $user_phone->client->admin->user->package_date <= now()->format('Y-m-d') && $user_phone->client->admin->user->is_active == 0){
+                return response()->json("not active client");
+
+            }elseif($user_phone->user_type == "representative" && $user_phone->representative->admin->user->package_date <= now()->format('Y-m-d') && $user_phone->representative->admin->user->is_active == 0){
+                return response()->json("not active representative");
+
+            }elseif($user_phone->user_type == "employee" && $user_phone->employee->admin->user->package_date <= now()->format('Y-m-d') && $user_phone->employee->admin->user->is_active == 0){
+                return response()->json("not active employee");
+
+            }elseif($user_phone->user_type == "company" && $user_phone->company->admin->user->package_date <= now()->format('Y-m-d') && $user_phone->company->admin->user->is_active == 0){
+                return response()->json("not active company");
+
+            }
 
             if ($user_phone->user_type != 'representative'){
                 return $this-> returnError('Not Found user','2','2');
@@ -253,9 +287,6 @@ class AuthUserMobileController extends Controller
                 'city_id'  =>  'required|exists:cities,id',
                 'photo' => 'nullable|mimes:jpeg:jpeg,jpg,png,gif|nullable',
                 'token' => 'nullable|string',
-
-
-
             ]);
             if ($validator->fails()) {
 //                return response()->json($validator->errors()->toJson(), 400);
@@ -270,10 +301,10 @@ class AuthUserMobileController extends Controller
                 ['token' => '$request->token'],
 
             ));
+
             $user_api_K = UserApiK::create([
                 "user_id" => $user->id,
                 'api_k' =>Str::random(50),
-
             ]);
 
             //      =================upload  photo  App\Models\company

@@ -54,7 +54,7 @@ class PackageUserController extends Controller
                         'email' => 'required|email|unique:users',
                         'photo' => 'mimes:jpeg:jpeg,jpg,png,gif|nullable',
                         'password' => 'required|min:8|confirmed',
-                        'package_date' => 'required|date',
+//                        'package_date' => 'required|date',
                         'phone_number' => 'required|min:11|unique:users',
 
     //                'date' => 'required|date',
@@ -74,7 +74,7 @@ class PackageUserController extends Controller
                         'phone_number' => $request->phone_number,
                         'password' => Hash::make($request['password']),
                         'user_type'=>'admin',
-                        'package_date'=>$request->package_date,
+                        'package_date'=>now()->addMonths($package->count_months),
                         'package_id'=>$id,
 
                     ]);
@@ -102,7 +102,7 @@ class PackageUserController extends Controller
                     $admin = Admin::create([
                         "user_id" => $user->id,
                         'name'=>$request->name,
-                        'date'=>$package->package_date,
+                        'date'=>now()->addMonths($package->count_months),
                         'photo'=> $new_file,
                     ]);
 
@@ -144,8 +144,76 @@ class PackageUserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-    }
+        DB::beginTransaction();
+        try {
+
+            $validation = Validator::make($request->all(), [
+
+                'phone_number' => 'required|min:11',
+                'email' => 'required|email',
+
+            ]);
+            if ($validation->fails()) {
+                return $this->returnError('errors', $validation->errors());
+
+//                return response()->json($validation->errors(), 422);
+            }
+            $user_auth = user::whereDate('package_date','<=',now()->format('Y-m-d'))->where('email',$request->email)
+                ->orWhere('phone_number',$request->phone_number)
+                ->first();
+
+            if($user_auth){
+                //      =================validate on Table  Models User and Admin
+
+                $admin = Admin::where('user_id',$user_auth->id)->first();
+
+                //      =================App\Models\User
+                $package =Package::find($id);
+//return $admin;
+                $user_auth->update([
+                    'package_date'=>now()->addMonths($package->count_months),
+                    'package_id'=>$package->id,
+
+                ]);
+
+                $admin->update([
+                    "user_id" => $user_auth->id,
+                    'date'=>now()->addMonths($package->count_months),
+
+                ]);
+
+                PackageUser::create([
+                    'count_months'=>$package->count_months,
+                    'price'=>$package->price,
+                    'user_id'=> $user_auth->id,
+                    'package_id'=>$package->id,
+
+                ]);
+
+
+
+
+            }else{
+
+
+
+
+                return $this-> returnError('مشترك من فبل هنا تسجيل مشترك جديد فقط','0','0');
+
+
+            }
+            DB::commit();
+
+            return $this->returnData('admin', $user_auth, 'successfully');
+
+
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+  }
 
     /**
      * Remove the specified resource from storage.

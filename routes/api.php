@@ -121,10 +121,16 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
 
     Route::get('date_shipment', [ApiController::class, 'index']);
 
+    Route::get('dashboard/all-Package', [PackageDetailController::class, 'index']);
+
+    Route::post('dashboard/create-PackageUser/{id}', [PackageUserController::class, 'store']);
+
+    Route::post('dashboard/update-PackageUser/{id}', [PackageUserController::class, 'update']);
+
 /*=========
   * *= Start Rout  Ligon Dashboard
 */
-    Route::group(['middleware' => 'checkdashboard', 'prefix' => 'dashboard'], function ($router) {
+    Route::group(['middleware' => ['checkdashboard','admin'], 'prefix' => 'dashboard'], function ($router) {
 
         /*===  Route Login Dashboard    ====*/
         Route::post('/logout', [AuthController::class, 'logout']);
@@ -540,10 +546,7 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
 
         /*===  Start Rout  Admin User    ====*/
         Route::get('all-PackageUser', [PackageUserController::class, 'index']);
-        Route::post('create-PackageUser/{id}', [PackageUserController::class, 'store']);
-        Route::post('update-PackageUser/{id}', [PackageUserController::class, 'update']);
-        Route::post('show-PackageUser/{id}', [PackageUserController::class, 'show']);
-        Route::post('destroy-PackageUser/{id}', [PackageUserController::class, 'destroy']);
+
 
 
     });
@@ -585,7 +588,7 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
        ***** = Group Mobile
     */
 
-    Route::group(['middleware' => 'checkmobile', 'prefix' => 'mobile'], function ($router) {
+    Route::group(['middleware' => ['checkmobile','admin'], 'prefix' => 'mobile'], function ($router) {
 
 
         Route::post('/logout', [AuthUserMobileController::class, 'logout']);

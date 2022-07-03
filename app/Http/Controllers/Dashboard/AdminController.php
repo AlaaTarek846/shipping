@@ -156,6 +156,7 @@ class AdminController extends Controller
 
             ]);
             if ($validation->fails()) {
+
 //                return response()->json($validation->errors(), 422);
                 return $this->returnError('errors', $validation->errors());
 

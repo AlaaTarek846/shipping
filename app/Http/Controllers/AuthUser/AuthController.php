@@ -42,7 +42,25 @@ class AuthController extends Controller
 
         }
         $user_email = User::where('email', $request->email)->first();
+
         if ($user_email) {
+
+            if($user_email->user_type == "admin" && $user_email->package_date <= now()->format('Y-m-d') && $user_email->is_active == 0) {
+                return response()->json("not active admin");
+            }elseif($user_email->user_type == "client" && $user_email->client->admin->user->package_date <= now()->format('Y-m-d') && $user_email->client->admin->user->is_active == 0){
+                return response()->json("not active client");
+
+            }elseif($user_email->user_type == "representative" && $user_email->representative->admin->user->package_date <= now()->format('Y-m-d') && $user_email->representative->admin->user->is_active == 0){
+                return response()->json("not active representative");
+
+            }elseif($user_email->user_type == "employee" && $user_email->employee->admin->user->package_date <= now()->format('Y-m-d') && $user_email->employee->admin->user->is_active == 0){
+                return response()->json("not active employee");
+
+            }elseif($user_email->user_type == "company" && $user_email->company->admin->user->package_date <= now()->format('Y-m-d') && $user_email->company->admin->user->is_active == 0){
+                return response()->json("not active company");
+
+            }
+
             if (Hash::check($request->password, $user_email->password)) {
                 if (!$token = auth()->attempt($validator->validated())) {
 

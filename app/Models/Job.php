@@ -13,6 +13,8 @@ class Job extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts=['name' => 'array'];
+
     //    =======================Relation  One To Many   Model = Employee = Many
 
     public function employees(){

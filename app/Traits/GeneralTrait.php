@@ -12,6 +12,15 @@ trait GeneralTrait
         if ($user->user_type == 'employee'){
 
             return  $user->empolyee->admin->id;
+
+        }elseif ($user->user_type == 'representative'){
+
+            return  $user->representative->admin->id;
+
+        }elseif ($user->user_type == 'company'){
+
+            return  $user->company->admin->id;
+
         }
         return $user->admin->id;
 
