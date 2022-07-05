@@ -130,6 +130,8 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
 
     Route::get('dashboard/all-Package', [PackageController::class, 'getpackage']);
 
+    Route::post('dashboard/packageFree', [PackageUserController::class, 'packageFree']);
+
     Route::post('dashboard/ContactMessage', [ContactMessageController::class, 'store']);
 
 
@@ -143,6 +145,10 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
         /*===  Route Login Dashboard    ====*/
         Route::get('allContactMessage', [ContactMessageController::class, 'index']);
         Route::post('deleteContactMessage/{id}', [ContactMessageController::class, 'destroy']);
+
+        Route::post('verifyEmail', [PackageUserController::class, 'verifyEmail']);
+        Route::post('resendVerificationCode', [PackageUserController::class, 'resendVerificationCode']);
+        Route::get('userVerified', [PackageUserController::class, 'userVerified']);
 
 
         /*===  Route Login Dashboard    ====*/
@@ -553,6 +559,8 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
         Route::put('packageDetail/{id}', [PackageDetailController::class, 'update']);
         Route::delete('packageDetail/{id}', [PackageDetailController::class, 'destroy']);
         Route::Resource('packageDetail', PackageDetailController::class);
+        Route::post('packageDetail/{id}', [PackageDetailController::class, 'store']);
+
 
         Route::put('PackageUser/{id}', [PackageUserController::class, 'update']);
         Route::delete('PackageUser/{id}', [PackageUserController::class, 'destroy']);

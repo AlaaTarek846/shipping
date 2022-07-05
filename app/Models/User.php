@@ -98,7 +98,7 @@ class User extends Authenticatable implements JWTSubject
      * @return array
      */
     public function getJWTCustomClaims() {
-        return [];
+        return ["email"=>$this->attributes["email"]];
     }
 
     //    =======================Relation  One To One  Model=client=One

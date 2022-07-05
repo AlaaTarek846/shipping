@@ -24,6 +24,7 @@ class CreateUsersTable extends Migration
             $table->text('token')->nullable();
             $table->integer('firebase_id')->nullable();
             $table->date('package_date')->nullable();
+            $table->date('free_date')->nullable();
             $table->bigInteger('package_id')->unsigned()->nullable();
             $table->foreign('package_id')->references('id')->on('packages')->onDelete('cascade');
             $table->rememberToken();

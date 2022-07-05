@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Package;
 use App\Models\PackageDetail;
 use App\Traits\GeneralTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -31,40 +32,34 @@ class PackageDetailController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request ,$id)
     {
         try {
 
             //      =================validate on Table  Models Branch
 
             $validation = Validator::make($request->all(), [
-                'package_detail' => 'required|array',
-                'package_detail.*.title' => 'required|string',
-                'package_detail.*.title_ar' => 'required|string',
-                'package_detail.*.cheack' => 'boolean',
-                'package_id' => 'required|exists:packages,id',
-
-
+                'title' => 'required|string',
+                'title_ar' => 'required|string',
+                'cheack' => 'boolean',
             ]);
             if ($validation->fails()) {
 //                return response()->json($validation->errors(), 422);
                 return $this->returnError('errors', $validation->errors());
 
             }
-            foreach($request->package_detail as $package_details){
 
-                 PackageDetail::create([
-                    'title' => $package_details['title'],
-                    'title_ar' => $package_details['title_ar'],
-                    'cheack' => $package_details['cheack'],
-                    'package_id' => $request->package_id,
-                ]);
+            $package = Package::find($id);
 
-            };
+            $package_details = PackageDetail::create([
+                'title' => $request->title,
+                'title_ar' => $request->title_ar,
+                'cheack' => $request->cheack,
+                'package_id' =>$package->id,
+            ]);
 
-
-            return response()->json('successfully');
-//            return $this->returnData('package_details', $package_details, 'successfully');
+//            return response()->json('successfully');
+            return $this->returnData('package_details', $package_details, 'successfully');
 //            return $request->package_detail;
 
         } catch (\Exception $e) {
@@ -81,7 +76,9 @@ class PackageDetailController extends Controller
      */
     public function show($id)
     {
-        //
+        $PackageDetail= PackageDetail::where('package_id',$id)->get();
+        return $this->returnData('package_details', $PackageDetail, 'successfully');
+
     }
 
     /**
@@ -93,8 +90,39 @@ class PackageDetailController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-    }
+        try {
+
+            //      =================validate on Table  Models Branch
+
+            $validation = Validator::make($request->all(), [
+                'title' => 'required|string',
+                'title_ar' => 'required|string',
+                'cheack' => 'boolean',
+            ]);
+            if ($validation->fails()) {
+//                return response()->json($validation->errors(), 422);
+                return $this->returnError('errors', $validation->errors());
+
+            }
+
+            $package_details = PackageDetail::find($id);
+            $package_details->update([
+                'title' => $request->title,
+                'title_ar' => $request->title_ar,
+                'cheack' => $request->cheack,
+                'package_id' =>$request->package_id,
+            ]);
+
+
+
+//            return response()->json('successfully');
+            return $this->returnData('package_details', $package_details, 'successfully');
+//            return $request->package_detail;
+
+        } catch (\Exception $e) {
+
+            return response()->json(['error' => $e->getMessage()], 500);
+        }    }
 
     /**
      * Remove the specified resource from storage.
@@ -104,6 +132,8 @@ class PackageDetailController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $package_details = PackageDetail::findOrFail($id);
+        $package_details->delete();
+        return response()->json("deleted successfully");
     }
 }
