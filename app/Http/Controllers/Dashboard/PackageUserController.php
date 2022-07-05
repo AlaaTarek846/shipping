@@ -84,6 +84,9 @@ class PackageUserController extends Controller
                         'price'=>$package->price,
                         'user_id'=> $user->id,
                         'package_id'=>$package->id,
+                        'start_date'=>now()->addDay(),
+                        'end_date'=>now()->addMonths($package->count_months),
+                        'status' => 'creat form admin ',
 
                     ]);
 
@@ -187,6 +190,9 @@ class PackageUserController extends Controller
                     'price'=>$package->price,
                     'user_id'=> $user_auth->id,
                     'package_id'=>$package->id,
+                    'start_date'=>now()->addDay(),
+                    'end_date'=>now()->addMonths($package->count_months),
+                    'status' => 'update form admin ',
 
                 ]);
 

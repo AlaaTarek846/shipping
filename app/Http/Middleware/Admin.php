@@ -31,7 +31,10 @@ class Admin
         }elseif(Auth::user()->user_type == "company" && Auth::user()->company->admin->user->package_date >= now()->format('Y-m-d') && Auth::user()->company->admin->user->is_active == 1){
             return $next($request);
 
-        } else
+        } elseif(Auth::user()->user_type == "speradmin" ){
+            return $next($request);
+
+        }else
         {
             return response()->json("not active");
         }

@@ -53,7 +53,16 @@ class BranchController extends Controller
 
             }
 
-            $branch = new Branch($request->all());
+            $branch = new Branch([
+                'name' => $request->name,
+                'address' => $request->address,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'location' => $request->location,
+                'area_id' => $request->area_id,
+                'admin_id' => $this->idAdmin(),
+
+            ]);
 
             //      =================upload  photo  App\Models\Branch
 
@@ -119,7 +128,16 @@ class BranchController extends Controller
 
             $name = $branch->photo;
 
-            $branch->update($request->all());
+            $branch->name =$request->name??$branch->name;
+            $branch->address =$request->address??$branch->address;
+            $branch->phone =$request->phone??$branch->phone;
+            $branch->email =$request->email??$branch->email;
+            $branch->location =$request->location??$branch->location;
+            $branch->area_id =$request->area_id??$branch->area_id;
+            $branch->admin_id = $this->idAdmin()??$this->idAdmin();
+
+
+            $branch->update();
 
             //      =================update  photo  App\Models\Branch
 

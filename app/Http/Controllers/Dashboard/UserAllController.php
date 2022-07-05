@@ -19,7 +19,7 @@ class UserAllController extends Controller
      */
     public function active_user($id)
     {
-        $user = User::findOrFail($id);
+        $user = User::where('admin_id',$this->idAdmin())->findOrFail($id);
         $user->update([
             'is_active' => 1
         ]);
@@ -29,7 +29,7 @@ class UserAllController extends Controller
 
     public function no_active_user($id)
     {
-        $user = User::findOrFail($id);
+        $user = User::where('admin_id',$this->idAdmin())->findOrFail($id);
         $user->update([
             'is_active' => 0
         ]);
@@ -46,20 +46,20 @@ class UserAllController extends Controller
      */
     public function alluser()
     {
-        $user = User::latest()->paginate(15);
+        $user = User::where('admin_id',$this->idAdmin())->latest()->paginate(15);
         return $this->returnData('user', $user, 'successfully');
 
     }
     public function all_user_active()
     {
-        $user = User::where('is_active',1)->latest()->paginate(15);
+        $user = User::where([['is_active',1],['admin_id',$this->idAdmin()]])->latest()->paginate(15);
         return $this->returnData('user', $user, 'successfully');
 
     }
 
     public function all_user_no_active()
     {
-        $user = User::where('is_active',0)->latest()->paginate(15);
+        $user = User::where([['is_active',0],['admin_id',$this->idAdmin()]])->latest()->paginate(15);
         return $this->returnData('user', $user, 'successfully');
 
     }
@@ -73,7 +73,7 @@ class UserAllController extends Controller
      */
     public function all_user_company()
     {
-        $user = User::where([['is_active',1],['user_type','company']])->orWhere('user_type','admin')->get();
+        $user = User::where([['is_active',1],['user_type','company'],['admin_id',$this->idAdmin()]])->orWhere('user_type','admin')->get();
 
         return $this->returnData('user', $user, 'successfully');
     }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
+use App\Models\Package;
+use App\Models\PackageUser;
 use App\Traits\GeneralTrait;
 use Illuminate\Http\Request;
 use App\Models\Admin;
@@ -29,9 +31,23 @@ class AdminController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function eidtAdminActive($id)
     {
-        //
+        $user_admin = User::find($id);
+        $user_admin->update([
+            'is_active' => 1,
+        ]);
+
+        return response()->json('successfully');
+    }
+    public function eidtAdminNoActive($id)
+    {
+        $user_admin = User::find($id);
+        $user_admin->update([
+            'is_active' => 0,
+        ]);
+
+        return response()->json('successfully');
     }
 
     /**
@@ -54,9 +70,7 @@ class AdminController extends Controller
                 'email' => 'required|email|unique:users',
                 'photo' => 'mimes:jpeg:jpeg,jpg,png,gif|nullable',
                 'password' => 'required|min:8|confirmed',
-                'package_date' => 'required|date',
-                'date' => 'required|date',
-                'package_id' => 'nullable|exists:packages,id',
+                'package_id' => 'required|exists:packages,id',
 
             ]);
             if ($validation->fails()) {
@@ -64,15 +78,26 @@ class AdminController extends Controller
 
 //                return response()->json($validation->errors(), 422);
             }
+//            return $request->package_id;
             //      =================App\Models\User
-
+            $package = Package::where('id',$request->package_id)->first();
             $user = User::create([
                 'email' => $request->email,
                 'password' => Hash::make($request['password']),
                 'user_type'=>'admin',
-                'package_date'=>$request->package_date,
+                'package_date'=>now()->addMonths($package->count_months),
                 'package_id'=>$request->package_id,
 
+            ]);
+
+            $pakage_user = PackageUser::create([
+                'count_months'=>$package->count_months,
+                'start_date'=>now()->addDay(),
+                'end_date'=>now()->addMonths($package->count_months),
+                'price'=>$package->price,
+                'user_id'=> $user->id,
+                'package_id'=>$package->id,
+                'status' => 'create model admin',
             ]);
 
             //      =================upload  photo  App\Models\Admin
@@ -90,7 +115,7 @@ class AdminController extends Controller
             $admin = Admin::create([
                 "user_id" => $user->id,
                 'name'=>$request->name,
-                'date'=>$request->date,
+                'date'=>now()->addMonths($package->count_months),
                 'photo'=> $new_file,
             ]);
 
@@ -153,6 +178,7 @@ class AdminController extends Controller
                 'name' => 'required|string',
                 'email' => 'required|email|unique:users,email' . ($user_id->id ? ",$user_id->id" : ''),
                 'photo' => 'mimes:jpeg:jpeg,jpg,png,gif',
+                'package_id' => 'required|exists:packages,id',
 
             ]);
             if ($validation->fails()) {
@@ -165,6 +191,7 @@ class AdminController extends Controller
             //      =================update  photo  App\Models\Admin
 
             $admin = Admin::find($id);
+
             $name = $admin->photo;
 
             if ($request->hasFile('photo')) {
@@ -176,16 +203,34 @@ class AdminController extends Controller
                 $file->move(public_path() . '/uploads/admin', $new_file);
                 $admin->photo = $new_file;
             }
+            $package = Package::where('id',$request->package_id)->first();
+
+
 
             //      =================update    App\Models\user
 
             $user = $admin->user;
             $user->email = $request->email??$user->email;
+            $user->email = $request->email??$user->email;
+            $user->package_date = now()->addMonths($package->count_months)??$user->package_date;
+            $user->package_id = $request->package_id??$user->package_id;
+
             $user->update();
+            $pakage_user = PackageUser::create([
+                'count_months'=>$package->count_months,
+                'start_date'=>now()->addDay(),
+                'end_date'=>now()->addMonths($package->count_months),
+                'price'=>$package->price,
+                'user_id'=> $user->id,
+                'package_id'=>$package->id,
+                'status' => 'update model admin',
+            ]);
 
             //      =================update    App\Models\Admin
 
             $admin->name = $request->name??$admin->name;
+            $admin->date = now()->addMonths($package->count_months)??$admin->date;
+
             $admin->update();
             DB::commit();
 

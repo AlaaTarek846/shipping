@@ -22,7 +22,7 @@ class ConnectController extends Controller
     public function index()
     {
 
-        $connect = Connect::all();
+        $connect = Connect::where('admin_id',$this->idAdmin())->with('admin')->get();
 
         return $this->returnData('connect', $connect, 'successfully');
     }
@@ -62,6 +62,7 @@ class ConnectController extends Controller
                 'phone_2' => $request->phone_2,
                 'phone' => $request->phone,
                 'notes' => $request->notes,
+                'admin_id' => $this->idAdmin(),
 
             ]);
 //            $connect->province;
@@ -108,7 +109,7 @@ class ConnectController extends Controller
             {
                 return $this->returnError('errors', $validation->errors());
             }
-            $connect = Connect::findOrFail($id);
+            $connect = Connect::where('admin_id',$this->idAdmin())->findOrFail($id);
             $user_id =  auth()->user()->id;
             $connect->user_id = $user_id;
             $connect->email = $request->email??$connect->email;
@@ -116,6 +117,7 @@ class ConnectController extends Controller
             $connect->notes = $request->notes??$connect->notes;
             $connect->phone  = $request->phone??$connect->phone;
             $connect->phone_2 = $request->phone_2??$connect->phone_2;
+            $connect->admin_id = $this->idAdmin()??$this->idAdmin();
             $connect->update();
 
             return $this->returnData('connect', $connect, 'successfully');

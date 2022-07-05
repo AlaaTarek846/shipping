@@ -21,7 +21,7 @@ class ClientController extends Controller
      */
     public function index()
     {
-        $client = Client::where('admin_id',$this->idAdmin())->with('user','citie')->latest()->paginate(15);
+        $client = Client::where('admin_id',$this->idAdmin())->with('user','citie','admin')->latest()->paginate(15);
 
         return $this->returnData('clients', $client, 'successfully');
 
@@ -203,19 +203,29 @@ class ClientController extends Controller
     {
 
         $client = Client::where('admin_id',$this->idAdmin())->find($id);
+        if($client){
 
-        if (count($client->shipment) > 0 ){
+            if (count($client->shipment) > 0 ){
 
-            return response()->json("no deleted ");
+                return response()->json("no deleted ");
+
+            }else{
+
+                if ($client->photo !== null) {
+                    unlink(public_path('uploads/client/') . $client->photo);
+                }
+                $client->destroy($id);
+                return response()->json('deleted successfully');
+            }
+
 
         }else{
 
-            if ($client->photo !== null) {
-                unlink(public_path('uploads/client/') . $client->photo);
-            }
-            $client->destroy($id);
-            return response()->json('deleted successfully');
+            return response()->json('no deleted successfully');
+
         }
+
+
 
     }
 

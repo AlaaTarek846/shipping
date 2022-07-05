@@ -20,7 +20,7 @@ class WeightCompanyController extends Controller
      */
     public function index($id)
     {
-        $weight_company  = WeightCompany::with('company')->where('company_id',$id)->get();
+        $weight_company  = WeightCompany::with('company','admin')->where([['company_id',$id],['admin_id',$this->idAdmin()]])->get();
 
         return $this->returnData('weight_company', $weight_company, 'successfully');
     }
@@ -46,7 +46,7 @@ class WeightCompanyController extends Controller
             {
                 return $this->returnError('errors', $validation->errors());
             }
-            $weight_company =  WeightCompany::where('company_id',$request->company_id)->first();
+            $weight_company =  WeightCompany::where([['company_id',$request->company_id],['admin_id',$this->idAdmin()]])->first();
             if($weight_company){
                 $weight_company->update([
 
@@ -54,11 +54,20 @@ class WeightCompanyController extends Controller
                     'limit' => $request->limit,
                     'price' => $request->price,
                     'company_id' => $request->company_id,
+                    'admin_id' => $this->idAdmin(),
+
 
                 ]);
             }else{
 
-                $weight_company = new WeightCompany($request->all());
+                $weight_company = new WeightCompany([
+                    'type' => $request->type,
+                    'limit' => $request->limit,
+                    'price' => $request->price,
+                    'company_id' => $request->company_id,
+                    'admin_id' => $this->idAdmin(),
+
+                ]);
                 $weight_company->save();
             }
             $weight_company->company;
@@ -79,7 +88,7 @@ class WeightCompanyController extends Controller
      */
     public function show($id)
     {
-        $weight_company = Weight::findOrFail($id);
+        $weight_company = Weight::where('admin_id',$this->idAdmin())->findOrFail($id);
         return $weight_company;
     }
 
@@ -105,8 +114,14 @@ class WeightCompanyController extends Controller
                 return $this->returnError('errors', $validation->errors());
             }
 
-            $weight_company = WeightCompany::findOrFail($id);
-            $weight_company->update($request->all());
+            $weight_company = WeightCompany::where('admin_id',$this->idAdmin())->findOrFail($id);
+            $weight_company->type  = $request->type??$weight_company->type;
+            $weight_company->limit  = $request->limit??$weight_company->limit;
+            $weight_company->price = $request->price??$weight_company->price;
+            $weight_company->company_id = $request->company_id??$weight_company->company_id;
+            $weight_company->admin_id = $this->idAdmin()??$this->idAdmin();
+
+            $weight_company->update();
 
             return $this->returnData('weight_company', $weight_company, 'successfully');
 
@@ -125,7 +140,7 @@ class WeightCompanyController extends Controller
      */
     public function destroy($id)
     {
-        $weight_company = WeightCompany::findOrFail($id);
+        $weight_company = WeightCompany::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         $weight_company->delete();
         return response()->json("deleted successfully");

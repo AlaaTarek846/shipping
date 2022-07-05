@@ -19,4 +19,12 @@ class WeightCompany extends Model
 
         return $this->belongsTo(Company::class,'company_id');
     }
+
+    //    =======================Relation  Admin User
+
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
+
 }

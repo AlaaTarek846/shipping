@@ -90,7 +90,7 @@ class OfferController extends Controller
                 return $this->returnError('errors', $validation->errors());
             }
             $offer = Offer::where('admin_id',$this->idAdmin())->findOrFail($id);
-            $offer->title = $request->title??$storage_system->title;
+            $offer->title = $request->title??$offer->title;
             $offer->admin_id = $this->idAdmin()??$this->idAdmin();
             $offer->update();
 
@@ -111,7 +111,7 @@ class OfferController extends Controller
      */
     public function destroy($id)
     {
-        $offer = Offer::findOrFail($id);
+        $offer = Offer::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         if (count($offer->provinces) > 0)
         {

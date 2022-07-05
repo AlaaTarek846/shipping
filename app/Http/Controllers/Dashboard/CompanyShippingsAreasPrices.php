@@ -23,7 +23,7 @@ class CompanyShippingsAreasPrices extends Controller
      */
     public function index($id)
     {
-        $company_shipping_area_Price = CompanyShippingAreaPrice::where('company_id', $id)->with('area.province','company')->get();
+        $company_shipping_area_Price = CompanyShippingAreaPrice::where([['company_id', $id],['admin_id',$this->idAdmin()]])->with('area.province','company')->get();
 
         return $this->returnData('company_shipping_area_Price', $company_shipping_area_Price, 'successfully');
     }
@@ -32,7 +32,7 @@ class CompanyShippingsAreasPrices extends Controller
     {
         $company_id = auth()->user()->company->id;
 
-        $company_shipping_area_Price = CompanyShippingAreaPrice::where('company_id', $company_id)->get();
+        $company_shipping_area_Price = CompanyShippingAreaPrice::where([['company_id', $company_id],['admin_id',$this->idAdmin()]])->get();
 
         return $this->returnData('company_shipping_area_Price', $company_shipping_area_Price, 'successfully');
     }
@@ -63,8 +63,8 @@ class CompanyShippingsAreasPrices extends Controller
             }
             foreach ($request->areas_id as $area_price){
 
-                $ShippingAreaPrice = ShippingAreaPrice::find($area_price);
-                $company_shipping_area_price = CompanyShippingAreaPrice::where([['area_id', $ShippingAreaPrice->area_id], ['company_id', $request->company_id]])->first();
+                $ShippingAreaPrice = ShippingAreaPrice::where('admin_id',$this->idAdmin())->find($area_price);
+                $company_shipping_area_price = CompanyShippingAreaPrice::where([['area_id', $ShippingAreaPrice->area_id],['company_id', $request->company_id],['admin_id',$this->idAdmin()]])->first();
 
                 if ($company_shipping_area_price){
 
@@ -75,6 +75,7 @@ class CompanyShippingsAreasPrices extends Controller
                         'returned_time' => $ShippingAreaPrice->returned_time,
                         'company_id' => $request->company_id,
                         'area_id' => $ShippingAreaPrice->area_id,
+                        'admin_id' => $this->idAdmin(),
 
                     ]);
 
@@ -87,8 +88,10 @@ class CompanyShippingsAreasPrices extends Controller
                         'returned_time' => $ShippingAreaPrice->returned_time,
                         'company_id' => $request->company_id,
                         'area_id' => $ShippingAreaPrice->area_id,
+                        'admin_id' => $this->idAdmin(),
 
-                    ]);
+
+                      ]);
 
                 }
 
@@ -116,7 +119,8 @@ class CompanyShippingsAreasPrices extends Controller
      */
     public function show($id)
     {
-        $company_shipping_area_Price = ShippingAreaPrice::findOrFail($id);
+        $company_shipping_area_Price = ShippingAreaPrice::where('admin_id',$this->idAdmin())->
+        findOrFail($id);
         return $this->returnData('company_shipping_area_Price', $company_shipping_area_Price, 'successfully');
 
     }
@@ -149,18 +153,21 @@ class CompanyShippingsAreasPrices extends Controller
 
             if ($request->seve_for_all == 1) {
 
-                $province_area = Area::with('province')->find($request->area_id);
+                $province_area = Area::with('province')->where('admin_id',$this->idAdmin())->find($request->area_id);
                 $areas = $province_area->province->areas;
                 foreach ($areas as $area) {
                     $company_shipping_area_Price = CompanyShippingAreaPrice::where([
                         ["company_id", $request->company_id],
-                        ["area_id", $area->id]
+                        ["area_id", $area->id],
+                        ['admin_id',$this->idAdmin()]
                     ])->first();
                     if ($company_shipping_area_Price) {
                         $company_shipping_area_Price->update([
                             'transportation_price' => $request->transportation_price,
                             'delivery_time' => $request->delivery_time,
                             'returned_time' => $request->returned_time,
+                            'admin_id' => $this->idAdmin(),
+
                         ]);
                     }
 
@@ -168,7 +175,7 @@ class CompanyShippingsAreasPrices extends Controller
 
             } else {
 
-                $company_shipping_area_Price = CompanyShippingAreaPrice::find($id);
+                $company_shipping_area_Price = CompanyShippingAreaPrice::where('admin_id',$this->idAdmin())->find($id);
 
                 $company_shipping_area_Price->update([
 
@@ -177,6 +184,7 @@ class CompanyShippingsAreasPrices extends Controller
                     'returned_time' => $request->returned_time,
                     'area_id' => $request->area_id,
                     'company_id' => $request->company_id,
+                    'admin_id' => $this->idAdmin(),
 
                 ]);
 
@@ -197,7 +205,7 @@ class CompanyShippingsAreasPrices extends Controller
      */
     public function destroy($id)
     {
-        $company_shipping_area_Price = CompanyShippingAreaPrice::find($id);
+        $company_shipping_area_Price = CompanyShippingAreaPrice::where('admin_id',$this->idAdmin())->find($id);
 
         $company_shipping_area_Price->destroy($id);
         return response()->json("deleted successfully");

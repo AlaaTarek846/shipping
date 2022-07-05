@@ -19,7 +19,7 @@ class RepresentativeAreaController extends Controller
      */
     public function index()
     {
-        $representative_area = RepresentativeArea::with('Representative','service_type','area')->get();
+        $representative_area = RepresentativeArea::where('admin_id',$this->idAdmin())->with('Representative','service_type','area','admin')->get();
 
         return $this->returnData('representative_area', $representative_area, 'successfully');
     }
@@ -52,8 +52,7 @@ class RepresentativeAreaController extends Controller
             }
 
             foreach ($request->date_representative_area as $date_representative_area) {
-
-                $representative_area = RepresentativeArea::where([['area_id',$date_representative_area['area_id']],['representative_id',$date_representative_area['representative_id']]])->first();
+                $representative_area = RepresentativeArea::where([['area_id',$date_representative_area['area_id']],['representative_id',$date_representative_area['representative_id']],['admin_id',$this->idAdmin()]])->first();
 
                 if ($representative_area){
 
@@ -64,6 +63,8 @@ class RepresentativeAreaController extends Controller
                         'area_id' => $date_representative_area['area_id'],
                         'representative_id' =>     $date_representative_area['representative_id'],
                         'service_type_id' =>     $date_representative_area['service_type_id'],
+                        'admin_id' => $this->idAdmin(),
+
                     ]);
 
                 }else{
@@ -76,6 +77,8 @@ class RepresentativeAreaController extends Controller
                         'area_id' => $date_representative_area['area_id'],
                         'representative_id' =>     $date_representative_area['representative_id'],
                         'service_type_id' =>     $date_representative_area['service_type_id'],
+                        'admin_id' => $this->idAdmin(),
+
 
                     ]);
 
@@ -106,7 +109,7 @@ class RepresentativeAreaController extends Controller
      */
     public function show($id)
     {
-        $representative_area = RepresentativeArea::findOrFail($id);
+        $representative_area = RepresentativeArea::where('admin_id',$this->idAdmin())->findOrFail($id);
         return $this->returnData('representative_area', $representative_area, 'successfully');
 
     }
@@ -143,7 +146,7 @@ class RepresentativeAreaController extends Controller
 
             foreach ($request->date_representative_area as $date_representative_area) {
 
-                $representative_area = RepresentativeArea::where('area_id', $date_representative_area['area_id'])->first();
+                $representative_area = RepresentativeArea::where(['area_id', $date_representative_area['area_id'],['admin_id',$this->idAdmin()]])->first();
 
                 $representative_area->update([
 
@@ -152,6 +155,8 @@ class RepresentativeAreaController extends Controller
                     'area_id' => $date_representative_area['area_id'],
                     'representative_id' => $date_representative_area['representative_id'],
                     'service_type_id' => $date_representative_area['service_type_id'],
+                    'admin_id' => $this->idAdmin(),
+
 
                 ]);
 
@@ -174,7 +179,7 @@ class RepresentativeAreaController extends Controller
      */
     public function destroy($id)
     {
-        $representative_area = RepresentativeArea::find($id);
+        $representative_area = RepresentativeArea::where('admin_id',$this->idAdmin())->find($id);
 
 
         $representative_area->destroy($id);

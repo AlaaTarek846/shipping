@@ -17,6 +17,13 @@ class AdditionalService extends Model
 
         return $this->hasMany(Shipment::class);
     }
+    //    =======================Relation  Admin User
+
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
+
 
 
 }

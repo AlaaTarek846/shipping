@@ -78,6 +78,7 @@ use App\Http\Controllers\Dashboard\SuperAdminController;
 use App\Http\Controllers\Dashboard\PackageController;
 use App\Http\Controllers\Dashboard\PackageDetailController;
 use App\Http\Controllers\Dashboard\PackageUserController;
+use App\Http\Controllers\Dashboard\ContactMessageController;
 
 
 
@@ -129,6 +130,7 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
 
     Route::get('dashboard/all-Package', [PackageController::class, 'getpackage']);
 
+    Route::post('dashboard/ContactMessage', [ContactMessageController::class, 'store']);
 
 
 
@@ -137,6 +139,11 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
   * *= Start Rout  Ligon Dashboard
 */
     Route::group(['middleware' => ['checkdashboard','admin'], 'prefix' => 'dashboard'], function ($router) {
+
+        /*===  Route Login Dashboard    ====*/
+        Route::get('allContactMessage', [ContactMessageController::class, 'index']);
+        Route::post('deleteContactMessage/{id}', [ContactMessageController::class, 'destroy']);
+
 
         /*===  Route Login Dashboard    ====*/
         Route::post('/logout', [AuthController::class, 'logout']);
@@ -180,6 +187,8 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
         Route::post('update-admin/{id}', [AdminController::class, 'update']);
         Route::post('show-admin/{id}', [AdminController::class, 'show']);
         Route::post('destroy-admin/{id}', [AdminController::class, 'destroy']);
+        Route::post('eidtAdminActive/{id}', [AdminController::class, 'eidtAdminActive']);
+        Route::post('eidtAdminNoActive/{id}', [AdminController::class, 'eidtAdminNoActive']);
 
         /*===  Start Rout  Representative User    ====*/
         Route::get('all-representative', [RepresentativeController::class, 'index']);

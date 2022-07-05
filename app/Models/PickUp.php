@@ -28,4 +28,11 @@ class PickUp extends Model
         return $this->belongsTo(TransportType::class,'transport_type_id');
 
     }
+
+    //    =======================Relation  Admin User
+
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
 }

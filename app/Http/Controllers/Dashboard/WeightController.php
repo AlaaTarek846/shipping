@@ -21,7 +21,7 @@ class WeightController extends Controller
      */
     public function index()
     {
-        $weight = Weight::all();
+        $weight = Weight::where('admin_id',$this->idAdmin())->with('admin')->get();
 
         return $this->returnData('weight', $weight, 'successfully');
     }
@@ -45,15 +45,23 @@ class WeightController extends Controller
             if ($validation->fails()) {
                 return $this->returnError('errors', $validation->errors());
             }
-            $weight = Weight::first();
+            $weight = Weight::where('admin_id',$this->idAdmin())->first();
             if ($weight) {
                 $weight->update([
                     'type' => $request->type,
                     'limit' => $request->limit,
                     'price' => $request->price,
+                    'admin_id' => $this->idAdmin(),
+
                 ]);
             } else {
-                $weight = new Weight($request->all());
+                $weight = new Weight([
+                    'type' => $request->type,
+                    'limit' => $request->limit,
+                    'price' => $request->price,
+                    'admin_id' => $this->idAdmin(),
+
+                ]);
                 $weight->save();
             }
 
@@ -73,7 +81,7 @@ class WeightController extends Controller
      */
     public function show($id)
     {
-        $weight = Weight::findOrFail($id);
+        $weight = Weight::where('admin_id',$this->idAdmin())->with('admin')->findOrFail($id);
         return $weight;
     }
 
@@ -96,7 +104,11 @@ class WeightController extends Controller
                 return $this->returnError('errors', $validation->errors());
             }
             $weight = Weight::findOrFail($id);
-            $weight->update($request->all());
+            $weight->type =$request->type??$weight->type;
+            $weight->limit =$request->limit??$weight->limit;
+            $weight->price =$request->price??$weight->price;
+            $weight->admin_id = $this->idAdmin()??$this->idAdmin();
+            $weight->update();
 
             return $this->returnData('weight', $weight, 'successfully');
 
@@ -115,7 +127,7 @@ class WeightController extends Controller
      */
     public function destroy($id)
     {
-        $weight = Weight::findOrFail($id);
+        $weight = Weight::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         $weight->delete();
         return response()->json("deleted successfully");

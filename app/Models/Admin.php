@@ -111,6 +111,37 @@ class Admin extends Model
 
         return $this->hasMany(StorageSystem::class);
     }
+    //    =======================Relation  PickUp
+
+    public function pickUp(){
+
+        return $this->hasMany(PickUp::class);
+    }
+    //    =======================Relation  Connect
+
+    public function connect(){
+
+        return $this->hasMany(Connect::class);
+    }
+    //    =======================Relation  Complain
+
+    public function complain(){
+
+        return $this->hasMany(Complain::class);
+    }
+    //    =======================Relation  WeightCompany
+
+    public function weightCompany(){
+
+        return $this->hasMany(WeightCompany::class);
+    }
+    //    =======================Relation  Weight
+
+    public function weight(){
+
+        return $this->hasMany(Weight::class);
+    }
+
 
 
     //    =======================Creat  Url  Photo

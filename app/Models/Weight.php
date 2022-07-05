@@ -12,4 +12,11 @@ class Weight extends Model
     //    =======================Models Weight fields
 
     protected $guarded = ['id'];
+    //    =======================Relation  Admin User
+
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
+
 }

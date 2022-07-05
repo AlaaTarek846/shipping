@@ -20,7 +20,7 @@ class ComplainController extends Controller
     {
         $user_id =  auth()->user()->id;
 
-        $complain = Complain::with('user')->where('user_id',$user_id)->get();
+        $complain = Complain::with('user','admin')->where([['user_id',$user_id],['admin_id',$this->idAdmin()]])->get();
 
         return $this->returnData('complain', $complain, 'successfully');
     }
@@ -28,7 +28,7 @@ class ComplainController extends Controller
     public function allStatusNoactive()
     {
 
-        $complain = Complain::with('user')->where('status',0)->get();
+        $complain = Complain::with('user','admin')->where([['status',0],['admin_id',$this->idAdmin()]])->get();
 
         return $this->returnData('complain', $complain, 'successfully');
     }
@@ -36,7 +36,7 @@ class ComplainController extends Controller
     public function allStatus()
     {
 
-        $complain = Complain::with('user')->get();
+        $complain = Complain::where('admin_id',$this->idAdmin())->with('user','admin')->get();
 
         return $this->returnData('complain', $complain, 'successfully');
     }
@@ -67,6 +67,8 @@ class ComplainController extends Controller
 
                 'user_id' => $user_id,
                 'notes' => $request->notes,
+                'admin_id' => $this->idAdmin(),
+
 
             ]);
 
@@ -110,12 +112,12 @@ class ComplainController extends Controller
             {
                 return $this->returnError('errors', $validation->errors());
             }
-            $complain = Complain::findOrFail($id);
+            $complain = Complain::where('admin_id',$this->idAdmin())->findOrFail($id);
 
             $user_id =  auth()->user()->id;
             $complain->user_id = $user_id;
-
             $complain->notes = $request->notes;
+            $complain->admin_id = $this->idAdmin()??$this->idAdmin();
 
             $complain->update();
 
@@ -143,7 +145,7 @@ class ComplainController extends Controller
 
     public function status_active($id)
     {
-        $complain = Complain::findOrFail($id);
+        $complain = Complain::where('admin_id',$this->idAdmin())->findOrFail($id);
         $complain->update([
             'status' => 1
         ]);

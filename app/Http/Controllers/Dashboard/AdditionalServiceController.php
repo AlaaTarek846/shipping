@@ -20,7 +20,7 @@ class AdditionalServiceController extends Controller
      */
     public function index()
     {
-        $additional_service  = AdditionalService::all();
+        $additional_service  = AdditionalService::where('admin_id',$this->idAdmin())->with('admin')->get();
 
         return $this->returnData('additional_service', $additional_service, 'successfully');
     }
@@ -45,7 +45,11 @@ class AdditionalServiceController extends Controller
                 return $this->returnError('errors', $validation->errors());
             }
 
-            $additional_service = new AdditionalService($request->all());
+            $additional_service = new AdditionalService([
+                'type' => $request->type,
+                'price' => $request->price,
+                'admin_id' => $this->idAdmin(),
+            ]);
             $additional_service->save();
             return $this->returnData('additional_service', $additional_service, 'successfully');
 
@@ -63,7 +67,7 @@ class AdditionalServiceController extends Controller
      */
     public function show($id)
     {
-        $additional_service = AdditionalService::findOrFail($id);
+        $additional_service = AdditionalService::where('admin_id',$this->idAdmin())->findOrFail($id);
         return $additional_service;
     }
 
@@ -85,8 +89,12 @@ class AdditionalServiceController extends Controller
             {
                 return $this->returnError('errors', $validation->errors());
             }
-            $additional_service = AdditionalService::findOrFail($id);
-            $additional_service->update($request->all());
+            $additional_service = AdditionalService::where('admin_id',$this->idAdmin())->findOrFail($id);
+            $additional_service->type =$request->type??$additional_service->type;
+            $additional_service->price =$request->price??$additional_service->price;
+            $additional_service->admin_id = $this->idAdmin()??$this->idAdmin();
+
+            $additional_service->update();
 
             return $this->returnData('additional_service', $additional_service, 'successfully');
 
@@ -105,7 +113,7 @@ class AdditionalServiceController extends Controller
      */
     public function destroy($id)
     {
-        $additional_service = AdditionalService::findOrFail($id);
+        $additional_service = AdditionalService::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         if (count($additional_service->shipment) > 0)
         {

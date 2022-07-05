@@ -22,7 +22,7 @@ class PickUpController extends Controller
     {
         $user_id =  auth()->user()->id;
 
-        $pickup = PickUp::with('transporttype')->where('user_id',$user_id)->latest()->paginate(15);
+        $pickup = PickUp::with('transporttype','admin')->where([['user_id',$user_id],['admin_id',$this->idAdmin()]])->latest()->paginate(15);
 
         return $this->returnData('pickup', $pickup, 'successfully');
     }
@@ -30,7 +30,7 @@ class PickUpController extends Controller
     public function index_admin()
     {
 
-        $pickup = PickUp::with('transporttype')->get();
+        $pickup = PickUp::where('admin_id',$this->idAdmin())->with('transporttype','admin')->get();
 
         return $this->returnData('pickup', $pickup, 'successfully');
     }
@@ -39,7 +39,7 @@ class PickUpController extends Controller
     public function allStatusNoactiveUp()
     {
 
-        $pickup = PickUp::with('transporttype')->where('status',0)->get();
+        $pickup = PickUp::with('transporttype','admin')->where([['status',0],['admin_id',$this->idAdmin()]])->get();
 
         return $this->returnData('pickup', $pickup, 'successfully');
     }
@@ -47,7 +47,7 @@ class PickUpController extends Controller
     public function allStatusUp()
     {
 
-        $pickup = PickUp::with('transporttype')->get();
+        $pickup = PickUp::where('admin_id',$this->idAdmin())->with('transporttype','admin')->get();
 
         return $this->returnData('pickup', $pickup, 'successfully');
     }
@@ -81,6 +81,8 @@ class PickUpController extends Controller
                 'user_id' => $user_id,
                 'notes' => $request->notes,
                 'transport_type_id' => $request->transport_type_id,
+                'admin_id' => $this->idAdmin(),
+
 
             ]);
             $pickup->transporttype;
@@ -126,12 +128,14 @@ class PickUpController extends Controller
             {
                 return $this->returnError('errors', $validation->errors());
             }
-            $pickup = PickUp::findOrFail($id);
+            $pickup = PickUp::where('admin_id',$this->idAdmin())->findOrFail($id);
 
             $user_id =  auth()->user()->id;
             $pickup->user_id = $user_id;
             $pickup->qty = $request->qty;
             $pickup->transport_type_id = $request->transport_type_id;
+            $pickup->admin_id = $this->idAdmin()??$this->idAdmin();
+
 
             if($pickup->notes == ''){
                 $pickup->notes = $request->notes;
@@ -157,7 +161,7 @@ class PickUpController extends Controller
      */
     public function destroy($id)
     {
-        $pickup = PickUp::findOrFail($id);
+        $pickup = PickUp::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         $pickup->delete();
         return response()->json("deleted successfully");

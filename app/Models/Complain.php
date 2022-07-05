@@ -19,4 +19,11 @@ class Complain extends Model
         return $this->belongsTo(User::class);
 
     }
+
+    //    =======================Relation  Admin
+
+    public function admin(){
+
+        return $this->belongsTo(Admin::class);
+    }
 }
