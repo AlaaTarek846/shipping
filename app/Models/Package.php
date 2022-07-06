@@ -35,6 +35,12 @@ class Package extends Model
 
         return $this->hasMany(PackageUser::class);
     }
+    //    =======================Relation   One To Many   Model = User = Many
+
+    public function paymentTypePackage(){
+
+        return $this->hasMany(PaymentTypePackage::class);
+    }
 
 
 }

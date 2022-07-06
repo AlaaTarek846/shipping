@@ -199,6 +199,13 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(PackageUser::class);
     }
 
+    //    =======================Relation   One To Many   Model = paymentTypePackage = Many
+
+    public function paymentTypePackage(){
+
+        return $this->hasMany(PaymentTypePackage::class);
+    }
+
 
 
 }
