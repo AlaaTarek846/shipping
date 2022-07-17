@@ -24,19 +24,19 @@ class FatoorahSevices{
         $this->base_url = env('fatoora_base_url');
         $this->headers =[
             'Content-Type'=>'application/json',
-            'authorization'=>'Bearer' . env('fatoora_token'),
+            'authorization'=>'Bearer '.env('fatoora_token'),
         ];
     }
-    private function buildRequest($url,$method, array $body)
+    private function buildRequest($url,$method, array $data)
     {
 
         $request = new Request($method, $this->base_url . $url,$this->headers);
 
-        if(!$body)
+        if(!$data)
             return false;
 
         $response = $this->request_client->send($request,[
-            'json' => $body
+            'json' => $data
         ]);
 
         if($response->getStatusCode() != 200)

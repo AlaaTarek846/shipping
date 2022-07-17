@@ -3,10 +3,16 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\FatoorahSevices;
+use App\Models\PaymentTransaction;
 use Illuminate\Http\Request;
 
 class FatoorahController extends Controller
 {
+    private    $fatoorahSevices;
+    public function __construct(FatoorahSevices $fatoorahSevices){
+        $this->fatoorahSevices = $fatoorahSevices;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -14,17 +20,32 @@ class FatoorahController extends Controller
      */
     public function index()
     {
-        $postFields = [
-            'NotificationOption' => 'Lnk', //'SMS', 'EML', or 'ALL'
+        $data = [
+            'NotificationOption' => 'EML', //'SMS', 'EML', or 'ALL'
             'InvoiceValue'       => '50',
-            'CustomerName'       => 'fname lname',
-            'DisplayCurrencyIso' => 'KWD',
-            'CustomerMobile'     => '1234567890',
-            'CustomerEmail'      => 'email@example.com',
-            'CallBackUrl'        => 'https://example.com/callback.php',
-            'ErrorUrl'           => 'https://example.com/callback.php', //or 'https://example.com/error.php'
+            'CustomerName'       => 'Alaa Tarek',
+            'CustomerMobile'     => '01113667448',
+            'DisplayCurrencyIso' => 'JOD',
+            'MobileCountryCode'  => '+20',
+            'CustomerEmail'      => 'alaazaza846@gmail.com',
+            'CallBackUrl'        => 'http://dashboard-subscribe.innovations-eg.com/api/callBackUrl',
+            'ErrorUrl'           => 'https://dashboard-subscribe.innovations-eg.com/api/errorUrl', //or 'https://example.com/error.php
             'Language'           => 'en', //or 'ar'
+
+
+
         ];
+        $data_fatoor = $this->fatoorahSevices ->sendPayment($data);
+        PaymentTransaction::create([
+            'invoiceId' => $data_fatoor['Data']['InvoiceId'],
+            'user_id' => 1,
+            'status' => 0
+
+        ]);
+
+        return $data_fatoor;
+
+
     }
 
     /**
@@ -33,10 +54,30 @@ class FatoorahController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function callBackUrl(Request $request)
     {
-        //
+        $data =[];
+        $data ['key'] = $request->paymentId;
+        $data ['keyType'] ='paymentId';
+        $data_fatoor = $this->fatoorahSevices->successPayment($data);
+
+        $PaymentTransaction = PaymentTransaction::where('invoiceId',$data_fatoor['Data']['InvoiceId'])->first();
+        $PaymentTransaction->update([
+            'status' => 1
+        ]);
+
+
+        return $data_fatoor;
     }
+    public function errorUrl(Request $request)
+    {
+
+
+        return 'errorUrl';
+    }
+
+
+
 
     /**
      * Display the specified resource.

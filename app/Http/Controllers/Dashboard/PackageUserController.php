@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\FatoorahSevices;
 use App\Models\Admin;
 use App\Models\EmailVerification;
 use App\Models\Package;
 use App\Models\PackageUser;
+use App\Models\PaymentTransaction;
 use App\Models\PaymentTypePackage;
 use App\Models\User;
 use App\Traits\GeneralTrait;
@@ -22,6 +24,10 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PackageUserController extends Controller
 {
+    private    $fatoorahSevices;
+    public function __construct(FatoorahSevices $fatoorahSevices){
+        $this->fatoorahSevices = $fatoorahSevices;
+    }
     use GeneralTrait;
 
     public function __constructor()
@@ -180,6 +186,14 @@ class PackageUserController extends Controller
         DB::beginTransaction();
 
         try {
+            $validation = Validator::make($request->all(), [
+                'email' => 'required|email|unique:users',
+                'phone_number' => 'required|min:11|unique:users',
+
+            ]);
+            if ($validation->fails()) {
+                return $this->returnError('errors', $validation->errors());
+            }
             $user_auth = user::where('email', $request->email)->orWhere('phone_number', $request->phone_number)->first();
 
             if ($user_auth) {
@@ -273,6 +287,7 @@ class PackageUserController extends Controller
                     ]);
 
                 } else {
+
                     $validation = Validator::make($request->all(), [
                         'name' => 'required|string',
                         'email' => 'required|email|unique:users',
@@ -283,6 +298,7 @@ class PackageUserController extends Controller
                     if ($validation->fails()) {
                         return $this->returnError('errors', $validation->errors());
                     }
+                    $arry=[];
 
                     $package = Package::find($id);
 
@@ -293,8 +309,8 @@ class PackageUserController extends Controller
                         'user_type' => 'admin',
                         'package_date' => now()->addMonths($package->count_months),
                         'package_id' => $id,
+                        'is_active'=>0,
                     ]);
-
                     $pakage_user = PackageUser::create([
                         'count_months' => $package->count_months,
                         'price' => $package->price,
@@ -330,12 +346,45 @@ class PackageUserController extends Controller
                         'photo' => $new_file,
                     ]);
 
+                    $data = [
+                        'NotificationOption' => 'EML', //'SMS', 'EML', or 'ALL'
+                        'InvoiceValue'       => $package->price,
+                        'CustomerName'       => $admin->name,
+                        'CustomerMobile'     =>  $user->phone_number,
+                        'DisplayCurrencyIso' => 'JOD',
+                        'MobileCountryCode'  => '+20',
+                        'CustomerEmail'      => $user->email,
+                        'CallBackUrl'        => 'https://dashboard-subscribe.innovations-eg.com/api/callBackUrl',
+                        'ErrorUrl'           => 'https://dashboard-subscribe.innovations-eg.com/api/errorUrl', //or 'https://example.com/error.php
+                        'Language'           => 'en', //or 'ar'
+
+                    ];
+                    $data_fatoor = $this->fatoorahSevices ->sendPayment($data);
+                    PaymentTransaction::create([
+                        'invoiceId' => $data_fatoor['Data']['InvoiceId'],
+                        'user_id' =>  $user->id,
+                        'status' => 0
+
+                    ]);
+
+                    $arry['data_fatoor'] =$data_fatoor;
+                    $arry['user'] =$user;
+
+
                 }
 
             }
             DB::commit();
 
-            return $this->returnData('admin', $user, 'successfully');
+            if ($request->payment_type == "vodafone" || $request->payment_type == "bank"){
+
+                return $this->returnData('arry', $user, 'successfully');
+
+            }else{
+
+                return $this->returnData('arry', $arry, 'successfully');
+
+            }
 
 
         } catch (\Exception $e) {
@@ -343,6 +392,41 @@ class PackageUserController extends Controller
 
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function callBackUrl(Request $request)
+    {
+        $data =[];
+        $data ['key'] = $request->paymentId;
+        $data ['keyType'] ='paymentId';
+        $data_fatoor = $this->fatoorahSevices->successPayment($data);
+
+        $PaymentTransaction = PaymentTransaction::where('invoiceId',$data_fatoor['Data']['InvoiceId'])->first();
+        if($PaymentTransaction){
+            $PaymentTransaction->update([
+                'status' => 1
+            ]);
+            $user = User::find($PaymentTransaction->user_id);
+            $user->update([
+                'is_active' => 1,
+            ]);
+        }
+
+        return $data_fatoor;
+    }
+    public function errorUrl(Request $request)
+    {
+        $data =[];
+        $data ['key'] = $request->paymentId;
+        $data ['keyType'] ='paymentId';
+        $data_fatoor = $this->fatoorahSevices->successPayment($data);
+        $PaymentTransaction = PaymentTransaction::where('invoiceId',$data_fatoor['Data']['InvoiceId'])->first();
+        if($PaymentTransaction){
+            $user = User::find($PaymentTransaction->user_id);
+            $user->delete();
+        }
+
+        return 'errorUrl';
     }
 
     /**
@@ -437,11 +521,15 @@ class PackageUserController extends Controller
                     }
 
                 }else{
+
+                    $arry=[];
+
                     $admin = Admin::where('user_id', $user_auth->id)->first();
                     $package = Package::find($id);
                     $user_auth->update([
                         'package_date' => now()->addMonths($package->count_months),
                         'package_id' => $package->id,
+                        'is_active'=>0,
 
                     ]);
                     $admin->update([
@@ -459,6 +547,30 @@ class PackageUserController extends Controller
                         'status' => 'update form admin ',
                     ]);
 
+                    $data = [
+                        'NotificationOption' => 'EML', //'SMS', 'EML', or 'ALL'
+                        'InvoiceValue'       => $package->price,
+                        'CustomerName'       => $admin->name,
+                        'CustomerMobile'     =>  $user_auth->phone_number,
+                        'DisplayCurrencyIso' => 'JOD',
+                        'MobileCountryCode'  => '+20',
+                        'CustomerEmail'      => $user_auth->email,
+                        'CallBackUrl'        => 'https://dashboard-subscribe.innovations-eg.com/api/callBackUrl',
+                        'ErrorUrl'           => 'https://dashboard-subscribe.innovations-eg.com/api/errorUrlUpdate', //or 'https://example.com/error.php
+                        'Language'           => 'en', //or 'ar'
+
+                    ];
+                    $data_fatoor = $this->fatoorahSevices ->sendPayment($data);
+                    PaymentTransaction::create([
+                        'invoiceId' => $data_fatoor['Data']['InvoiceId'],
+                        'user_id' =>  $user_auth->id,
+                        'status' => 0
+
+                    ]);
+
+                    $arry['data_fatoor'] =$data_fatoor;
+                    $arry['user'] =$user_auth;
+
 
                 }
 
@@ -471,7 +583,16 @@ class PackageUserController extends Controller
             }
             DB::commit();
 
-            return $this->returnData('admin', $user_auth, 'successfully');
+            if ($request->payment_type == "vodafone" || $request->payment_type == "bank"){
+
+                return $this->returnData('arry', $user_auth, 'successfully');
+
+            }else{
+
+                return $this->returnData('arry', $arry, 'successfully');
+
+            }
+
 
 
         } catch (\Exception $e) {
@@ -479,6 +600,34 @@ class PackageUserController extends Controller
 
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function errorUrlUpdate(Request $request)
+    {
+        $data =[];
+        $data ['key'] = $request->paymentId;
+        $data ['keyType'] ='paymentId';
+        $data_fatoor = $this->fatoorahSevices->successPayment($data);
+        $PaymentTransaction = PaymentTransaction::where('invoiceId',$data_fatoor['Data']['InvoiceId'])->first();
+        if($PaymentTransaction){
+            $PaymentTransaction->update([
+                'status' => 0
+            ]);
+            $user = User::find($PaymentTransaction->user_id);
+            $user->update([
+                'is_active' => 0,
+            ]);
+            $admin = Admin::where('user_id', $user->id)->first();
+            $user->update([
+                'package_date' => now()->addDay(),
+                'is_active' => 0,
+            ]);
+            $admin->update([
+                'date' => now()->addMonths($package->count_months),
+            ]);
+        }
+
+        return 'errorUrl';
     }
 
     /**

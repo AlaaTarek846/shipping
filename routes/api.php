@@ -79,6 +79,7 @@ use App\Http\Controllers\Dashboard\PackageController;
 use App\Http\Controllers\Dashboard\PackageDetailController;
 use App\Http\Controllers\Dashboard\PackageUserController;
 use App\Http\Controllers\Dashboard\ContactMessageController;
+use App\Http\Controllers\Dashboard\FatoorahController;
 
 
 
@@ -134,6 +135,11 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
 
     Route::post('dashboard/ContactMessage', [ContactMessageController::class, 'store']);
 
+    Route::post('dashboard/Fatoorah', [FatoorahController::class, 'index']);
+    Route::get('callBackUrl', [PackageUserController::class, 'callBackUrl']);
+    Route::post('errorUrl', [PackageUserController::class, 'errorUrl']);
+    Route::post('errorUrlUpdate', [PackageUserController::class, 'errorUrlUpdate']);
+
 
 
 
@@ -141,6 +147,8 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
   * *= Start Rout  Ligon Dashboard
 */
     Route::group(['middleware' => ['checkdashboard','admin'], 'prefix' => 'dashboard'], function ($router) {
+
+
 
         /*===  Route Login Dashboard    ====*/
         Route::get('allContactMessage', [ContactMessageController::class, 'index']);
