@@ -120,6 +120,7 @@ class PackageUserController extends Controller
                     'free_date' => now()->addDay(7),
                     'package_date' => now()->addDay(7),
 
+
                 ]);
 
                 $pakage_user = PackageUser::create([
@@ -321,7 +322,7 @@ class PackageUserController extends Controller
                         'status' => 'creat form admin ',
 
                     ]);
-
+//                    active_status
                     $verificationCode = Str::random(5);
 
                     EmailVerification::create([
@@ -409,6 +410,10 @@ class PackageUserController extends Controller
             $user = User::find($PaymentTransaction->user_id);
             $user->update([
                 'is_active' => 1,
+            ]);
+            $pakage_user =PackageUser::where('user_id',$user->id)->latest()->first();
+            $pakage_user->update([
+                'active_status' => 1,
             ]);
         }
 

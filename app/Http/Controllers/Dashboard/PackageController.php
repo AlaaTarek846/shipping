@@ -83,7 +83,10 @@ class PackageController extends Controller
      */
     public function show($id)
     {
-        //
+        $package = Package::with('packageDetail')->find($id);
+
+        return $this->returnData('package', $package, 'successfully');
+
     }
 
     /**

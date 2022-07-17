@@ -14,7 +14,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-         LogCron::class
+         LogCron::class,
+         NotificationCron::class
     ];
 
     /**
@@ -27,6 +28,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('log:cron')->everyMinute();
+        $schedule->command('Notification:cron')->everyMinute();
     }
 
     /**

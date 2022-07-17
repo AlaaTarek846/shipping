@@ -80,6 +80,7 @@ use App\Http\Controllers\Dashboard\PackageDetailController;
 use App\Http\Controllers\Dashboard\PackageUserController;
 use App\Http\Controllers\Dashboard\ContactMessageController;
 use App\Http\Controllers\Dashboard\FatoorahController;
+use App\Http\Controllers\Dashboard\DetailAdminController;
 
 
 
@@ -129,9 +130,12 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
 
     Route::post('dashboard/update-PackageUser/{id}', [PackageUserController::class, 'update']);
 
-    Route::get('dashboard/all-Package', [PackageController::class, 'getpackage']);
 
-    Route::post('dashboard/packageFree', [PackageUserController::class, 'packageFree']);
+    Route::get('dashboard/all-Package', [PackageController::class, 'getpackage']);
+Route::get('dashboard/show-Package/{id}', [PackageController::class, 'show']);
+
+
+Route::post('dashboard/packageFree', [PackageUserController::class, 'packageFree']);
 
     Route::post('dashboard/ContactMessage', [ContactMessageController::class, 'store']);
 
@@ -574,8 +578,14 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
         Route::delete('PackageUser/{id}', [PackageUserController::class, 'destroy']);
         Route::Resource('PackageUser', PackageUserController::class);
 
+        /*===  Start Rout Detail  Admin   ====*/
+        Route::get('all-admin-day', [DetailAdminController::class, 'allAdminNewDay']);
+        Route::get('all-Count-Package', [DetailAdminController::class, 'allCountPackage']);
+        Route::get('all-admin-new-month', [DetailAdminController::class, 'allAdminNewMonth']);
+        Route::get('active-User-Package/{id}', [DetailAdminController::class, 'activeUserPackage']);
+        Route::get('no-active-user-package/{id}', [DetailAdminController::class, 'noActiveUserPackage']);
+        Route::get('customers-package/{id}', [DetailAdminController::class, 'customersPackage']);
 
-        /*===  Start Rout  Admin User    ====*/
 
 
 
