@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Package;
 use App\Models\User;
+use App\Traits\NotificationTrait;
 use Illuminate\Console\Command;
 
 class NotificationCron extends Command
@@ -13,7 +15,7 @@ class NotificationCron extends Command
      *
      * @var string
      */
-    protected $signature = '';
+    protected $signature = 'notification:cron';
 
     /**
      * The console command description.
@@ -40,20 +42,22 @@ class NotificationCron extends Command
     public function handle()
     {
 
-        $users = User::whereDate('package_date' , '<=' , now()->addDays(3))->get();
-        foreach ($users as $user){
+        $packages = Package::whereHas('user',function ($q){
+            $q->whereDate('package_date' , '<=' , now()->addDays(1))
+                ->whereDate('package_date' , '>=' , now());
+        })->get();
+        $user = User::where('user_type','speradmin')->first();
+        foreach ($packages as $package)
+        {
+            $package->count_user =  $package->user->count();
 
-            //send notification
             $tokens = [];
-            $tokens[] = $users>token;
-            $title = "Shipping in";
-            $body = "Shipping";
-            $request =  $users->id;
-            //02-  اشعار بوصول الشحنه رقم كذا ....... الى العميل اسمه كذا ........... رقم موبايل كذا .............  وحالة الشحنة ( مرتجع جزئي مسدد قيمة الشحن – مرتجع جزئي غير مسدد قيمة الشحن - ................ الخ )
-
+            $tokens[] = $user->token;
+            $title = "تنبية بمواعيد انتهاء الاشتراكات !";
+            $body = " مواعيد تجديد عملاء باقة $package->name_ar ($package->count_user)";
+            $request =  $user->id;
 
             $this->notification($tokens,$body,$title,$request);
-
         }
     }
 }

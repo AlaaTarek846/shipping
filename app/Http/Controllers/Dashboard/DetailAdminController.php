@@ -139,4 +139,25 @@ class DetailAdminController extends Controller
         return $this->returnData('user', $user, 'successfully');
 
     }
+    public function test()
+    {
+        $packages = Package::whereHas('user',function ($q){
+            $q->whereDate('package_date' , '<=' , now()->addDays(1))
+                ->whereDate('package_date' , '>=' , now());
+        })->get();
+        $user = User::where('user_type','speradmin')->first();
+        foreach ($packages as $package)
+        {
+            $package->count_user =  $package->user->count();
+
+            $tokens = [];
+            $tokens[] = $user->token;
+            $title = "تنبية بمواعيد انتهاء الاشتراكات !";
+            $body = " مواعيد تجديد عملاء باقة $package->name_ar ($package->count_user)";
+            $request =  $user->id;
+
+            $this->notification($tokens,$body,$title,$request);
+        }
+
+    }
 }

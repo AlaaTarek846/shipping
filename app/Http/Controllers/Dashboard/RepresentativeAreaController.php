@@ -84,8 +84,6 @@ class RepresentativeAreaController extends Controller
 
                 }
 
-
-
             }
 
             DB::commit();
@@ -156,11 +154,7 @@ class RepresentativeAreaController extends Controller
                     'representative_id' => $date_representative_area['representative_id'],
                     'service_type_id' => $date_representative_area['service_type_id'],
                     'admin_id' => $this->idAdmin(),
-
-
                 ]);
-
-
             }
             return response()->json("successfully");
 

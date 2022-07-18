@@ -19,7 +19,7 @@ class RepresentativeMovesController extends Controller
      */
     public function index()
     {
-        $representative_move = RepresentativeMove::with('Representative')->latest()->paginate('20');
+        $representative_move = RepresentativeMove::where('admin_id',$this->idAdmin())->with('Representative')->latest()->paginate('20');
         return $this->returnData('representative_move', $representative_move, 'successfully');
 
     }
@@ -28,7 +28,7 @@ class RepresentativeMovesController extends Controller
     {
         $representative_id =  auth()->user()->representative->id;
 
-        $representative_move = RepresentativeMove::with('Representative')->where('representative_id',$representative_id)->latest()->paginate('20');
+        $representative_move = RepresentativeMove::with('Representative')->where([['representative_id',$representative_id],['admin_id',$this->idAdmin()]])->latest()->paginate('20');
         return $this->returnData('representative_move', $representative_move, 'successfully');
 
     }
@@ -64,7 +64,7 @@ class RepresentativeMovesController extends Controller
                 'area' => $request->area,
                 'google_location' => $request->google_location,
                 'representative_id' => $request->representative_id,
-
+                'admin_id' => $this->idAdmin(),
 
             ]);
 
@@ -111,13 +111,15 @@ class RepresentativeMovesController extends Controller
             {
                 return $this->returnError('errors', $validation->errors());
             }
-            $representative_move = RepresentativeMove::findOrFail($id);
+            $representative_move = RepresentativeMove::where('admin_id',$this->idAdmin())->findOrFail($id);
 
             $representative_move->date = $request->date;
             $representative_move->time = $request->time;
             $representative_move->google_location = $request->google_location;
             $representative_move->area = $request->area;
             $representative_move->representative_id = $request->representative_id;
+            $representative_move->admin_id = $this->idAdmin()??$this->idAdmin();
+
 
             $representative_move->update();
 
@@ -137,7 +139,7 @@ class RepresentativeMovesController extends Controller
      */
     public function destroy($id)
     {
-        $representative_move = RepresentativeMove::findOrFail($id);
+        $representative_move = RepresentativeMove::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         $representative_move->delete();
         return response()->json("deleted successfully");

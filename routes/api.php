@@ -592,6 +592,7 @@ Route::post('dashboard/packageFree', [PackageUserController::class, 'packageFree
     });
 
 
+    Route::get('test', [DetailAdminController::class, 'test']);
 /*
  * ===== ENd Routs
  * ===== New Route Api From

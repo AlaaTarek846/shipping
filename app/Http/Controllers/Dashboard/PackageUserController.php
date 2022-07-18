@@ -57,7 +57,11 @@ class PackageUserController extends Controller
             $queryBuilder->delete();
             $user = User::where("email", $authUserEmail)->first();
             $user->email_verified_at = !$user->email_verified_at ? Carbon::now() : $user->email_verified_at;
+            $user->verify = 1;
             $user->save();
+
+            return $this->returnData('admin', $user, 'successfully');
+
         }
         if (!$emailVerification) {
             return response()->json(["errorMessage" => "Verification code is not valid"], 400);
@@ -73,6 +77,9 @@ class PackageUserController extends Controller
         $_emailVerification["created_at"] = Carbon::now();
         $_emailVerification->save();
         Mail::to($authUserEmail)->send(new EmailVerificationMail($verificationCode));
+
+        return response()->json(["successfully" => "Verification code successfully"], 200);
+
     }
 
     public function userVerified()
@@ -119,7 +126,6 @@ class PackageUserController extends Controller
                     'user_type' => 'admin',
                     'free_date' => now()->addDay(7),
                     'package_date' => now()->addDay(7),
-
 
                 ]);
 
@@ -352,7 +358,7 @@ class PackageUserController extends Controller
                         'InvoiceValue'       => $package->price,
                         'CustomerName'       => $admin->name,
                         'CustomerMobile'     =>  $user->phone_number,
-                        'DisplayCurrencyIso' => 'JOD',
+                        'DisplayCurrencyIso' => 'EGP',
                         'MobileCountryCode'  => '+20',
                         'CustomerEmail'      => $user->email,
                         'CallBackUrl'        => 'https://dashboard-subscribe.innovations-eg.com/api/callBackUrl',
@@ -624,11 +630,11 @@ class PackageUserController extends Controller
             ]);
             $admin = Admin::where('user_id', $user->id)->first();
             $user->update([
-                'package_date' => now()->addDay(),
+                'package_date' => now()->format('Y-m-d'),
                 'is_active' => 0,
             ]);
             $admin->update([
-                'date' => now()->addMonths($package->count_months),
+                'date' => now()->format('Y-m-d'),
             ]);
         }
 

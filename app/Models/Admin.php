@@ -141,6 +141,12 @@ class Admin extends Model
 
         return $this->hasMany(Weight::class);
     }
+    //    =======================Relation  RepresentativeArea
+
+    public function representativeArea(){
+
+        return $this->hasMany(RepresentativeArea::class);
+    }
 
 
 

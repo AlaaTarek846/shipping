@@ -88,7 +88,7 @@ class WeightCompanyController extends Controller
      */
     public function show($id)
     {
-        $weight_company = Weight::where('admin_id',$this->idAdmin())->findOrFail($id);
+        $weight_company = WeightCompany::where('admin_id',$this->idAdmin())->findOrFail($id);
         return $weight_company;
     }
 
