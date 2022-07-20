@@ -89,6 +89,7 @@ class AdminController extends Controller
                 'package_id'=>$request->package_id,
 
             ]);
+            $user->attachRole('super_admin');
 
             $pakage_user = PackageUser::create([
                 'count_months'=>$package->count_months,

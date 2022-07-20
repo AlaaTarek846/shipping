@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Mail\khaled;
+use App\Mail\SendMailMyFatorah;
 use App\Models\Package;
 use App\Models\PackageUser;
 use App\Models\User;
 use App\Traits\GeneralTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class DetailAdminController extends Controller
 {
@@ -139,25 +142,69 @@ class DetailAdminController extends Controller
         return $this->returnData('user', $user, 'successfully');
 
     }
-    public function test()
+    public function test(Request $request)
     {
-        $packages = Package::whereHas('user',function ($q){
-            $q->whereDate('package_date' , '<=' , now()->addDays(1))
-                ->whereDate('package_date' , '>=' , now());
-        })->get();
-        $user = User::where('user_type','speradmin')->first();
-        foreach ($packages as $package)
-        {
-            $package->count_user =  $package->user->count();
 
-            $tokens = [];
-            $tokens[] = $user->token;
-            $title = "تنبية بمواعيد انتهاء الاشتراكات !";
-            $body = " مواعيد تجديد عملاء باقة $package->name_ar ($package->count_user)";
-            $request =  $user->id;
+//
+//        $data = array(
+//            'email' => $request->email,
+//            'subject' => 'welcome message',
+//            'body' => 'Dear Dr:<h4>'.$request->name.'</h4>
+//            </br>
+//            Thanks for showing your interest to join our programs ,
+//            </br>
+//            you have successfully completed your registration form to apply to our specialty programs,
+//            </br>
+//            we will shortly inform you with all the details to proceed with your application process.
+//             </br>
+//            We wish you the best of luck.',
+//
+//        );
+//        Mail::send('frontend.mailregister', $data, function($message) use ($data){
+//            $message->from('Admission@rdi-int.co.uk' , 'Royal Dent Institute ');
+//            $message->to($data['email']);
+//            $message->subject($data['subject']);
+//        })
+//
+//
 
-            $this->notification($tokens,$body,$title,$request);
-        }
+
+
+
+
+//        Mail::to('alaazaza846@gmail.com')->send(new SendMailMyFatorah());
+        Mail::to('alaazaza846@gmail.com')->send(new khaled());
+
+
+
+//        send('', array(
+//
+//            'first_name' => 'sdasdasd',
+//
+//            'last_name' => 'asdassad',
+//
+//            'topic' => 'asdassad',
+//            'identification' => 'asdassad',
+//
+//            'message_one' => 'asdassad',
+//
+//            'email' => 'asdassad',
+//            'country_id' => 'asdassad',
+//
+//            'product_id' => 'asdassad',
+//
+//            'subject' => "hlooy",
+//
+//
+//        ), function($message) use ($request){
+//
+//            $message->from('info@imansoliman.com', 'Admin');
+//
+//            $message->to();
+//            $message->subject('test');
+////            $message->to($user->email, 'Admin')->subject($request->get('topic'));
+//
+//        });
 
     }
 }

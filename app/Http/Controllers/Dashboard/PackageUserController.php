@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Http\Controllers\Dashboard;
-
 use App\Http\Controllers\Controller;
 use App\Http\Services\FatoorahSevices;
+use App\Mail\khaled;
 use App\Models\Admin;
 use App\Models\EmailVerification;
 use App\Models\Package;
@@ -21,9 +21,9 @@ use App\Mail\EmailVerification as EmailVerificationMail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
-
 class PackageUserController extends Controller
 {
+
     private    $fatoorahSevices;
     public function __construct(FatoorahSevices $fatoorahSevices){
         $this->fatoorahSevices = $fatoorahSevices;
@@ -128,6 +128,7 @@ class PackageUserController extends Controller
                     'package_date' => now()->addDay(7),
 
                 ]);
+                $user->attachRole('super_admin');
 
                 $pakage_user = PackageUser::create([
                     'user_id' => $user->id,
@@ -235,6 +236,8 @@ class PackageUserController extends Controller
 
 
                     ]);
+                    $user->attachRole('super_admin');
+
                     $pakage_user = PackageUser::create([
                         'count_months' => $package->count_months,
                         'price' => $package->price,
@@ -318,6 +321,8 @@ class PackageUserController extends Controller
                         'package_id' => $id,
                         'is_active'=>0,
                     ]);
+                    $user->attachRole('super_admin');
+
                     $pakage_user = PackageUser::create([
                         'count_months' => $package->count_months,
                         'price' => $package->price,
@@ -358,7 +363,7 @@ class PackageUserController extends Controller
                         'InvoiceValue'       => $package->price,
                         'CustomerName'       => $admin->name,
                         'CustomerMobile'     =>  $user->phone_number,
-                        'DisplayCurrencyIso' => 'EGP',
+                        'DisplayCurrencyIso' => 'JOD',
                         'MobileCountryCode'  => '+20',
                         'CustomerEmail'      => $user->email,
                         'CallBackUrl'        => 'https://dashboard-subscribe.innovations-eg.com/api/callBackUrl',
@@ -421,9 +426,13 @@ class PackageUserController extends Controller
             $pakage_user->update([
                 'active_status' => 1,
             ]);
+
+
         }
 
+        Mail::to($user->email)->send(new khaled($data_fatoor));
         return $data_fatoor;
+
     }
     public function errorUrl(Request $request)
     {

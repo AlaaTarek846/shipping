@@ -29,6 +29,8 @@ class UserSeeder extends Seeder
             'user_id' => $user->id,
         ]);
 
+        $user->attachRole('super_admin');
+
         $user = User::create([
             'email'=>'admin@admin.com',
             'phone_number'=>'12345678910',
