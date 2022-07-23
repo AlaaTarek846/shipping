@@ -39,14 +39,19 @@ class DetailAdminController extends Controller
         $data = [];
 
         foreach ($allpackage as $index=>$package){
-            $data[$index]['name_ar'] = $package->name_ar;
-            $data[$index]['name'] = $package->name;
-            $data[$index]['count_user'] = $package->user->count();
-            $data[$index]['total_package'] = $package->packageUser->where('active_status',1)->sum('price');
+
+            $data['package'][$index]['name_ar'] = $package->name_ar;
+            $data['package'][$index]['name'] = $package->name;
+            $data['package'][$index]['count_user'] = $package->user->count();
+            $data['package'][$index]['total_package'] = $package->packageUser->where('active_status',1)->sum('price');
+
+//            $data[]=['name_ar'=>$package->name_ar,
+//                "name"=>$package->name,'count_user'=>$package->user->count(),'total_package'=>$package->packageUser->where('active_status',1)->sum('price')];
 
         }
         //        عداد يوضح اجمالي المتحصلات المالية من كل الباقات
         $totalPackage = PackageUser::where('active_status',1)->sum('price');
+
         $data['total-amount-Package'] = $totalPackage;
 
         return $this->returnData('date', $data, 'successfully');

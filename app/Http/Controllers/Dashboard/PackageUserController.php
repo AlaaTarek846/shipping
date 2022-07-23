@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Http\Services\FatoorahSevices;
-use App\Mail\khaled;
+use App\Mail\Fatorah;
 use App\Models\Admin;
 use App\Models\EmailVerification;
 use App\Models\Package;
@@ -21,6 +21,7 @@ use App\Mail\EmailVerification as EmailVerificationMail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
+
 class PackageUserController extends Controller
 {
 
@@ -418,7 +419,7 @@ class PackageUserController extends Controller
             $PaymentTransaction->update([
                 'status' => 1
             ]);
-            $user = User::find($PaymentTransaction->user_id);
+            $user = User::with('package')->find($PaymentTransaction->user_id);
             $user->update([
                 'is_active' => 1,
             ]);
@@ -426,12 +427,14 @@ class PackageUserController extends Controller
             $pakage_user->update([
                 'active_status' => 1,
             ]);
+            // return $user;
 
+            Mail::to($user->email)->send(new Fatorah($data_fatoor,$user));
 
         }
 
-        Mail::to($user->email)->send(new khaled($data_fatoor));
         return $data_fatoor;
+
 
     }
     public function errorUrl(Request $request)
