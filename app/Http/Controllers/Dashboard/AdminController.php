@@ -65,13 +65,11 @@ class AdminController extends Controller
             //      =================validate on Table  Models User and Admin
 
             $validation = Validator::make($request->all(), [
-
                 'name' => 'required|string',
                 'email' => 'required|email|unique:users',
                 'photo' => 'mimes:jpeg:jpeg,jpg,png,gif|nullable',
                 'password' => 'required|min:8|confirmed',
                 'package_id' => 'required|exists:packages,id',
-
             ]);
             if ($validation->fails()) {
                 return $this->returnError('errors', $validation->errors());

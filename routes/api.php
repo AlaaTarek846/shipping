@@ -128,14 +128,16 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
 
     Route::post('dashboard/create-PackageUser/{id}', [PackageUserController::class, 'store']);
 
+    Route::post('dashboard/storeone/{id}', [PackageUserController::class, 'storeone']);
+
     Route::post('dashboard/update-PackageUser/{id}', [PackageUserController::class, 'update']);
 
 
     Route::get('dashboard/all-Package', [PackageController::class, 'getpackage']);
-Route::get('dashboard/show-Package/{id}', [PackageController::class, 'show']);
+    Route::get('dashboard/show-Package/{id}', [PackageController::class, 'show']);
 
 
-Route::post('dashboard/packageFree', [PackageUserController::class, 'packageFree']);
+    Route::post('dashboard/packageFree', [PackageUserController::class, 'packageFree']);
 
     Route::post('dashboard/ContactMessage', [ContactMessageController::class, 'store']);
 

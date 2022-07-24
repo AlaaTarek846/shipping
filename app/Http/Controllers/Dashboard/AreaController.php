@@ -31,9 +31,7 @@ class AreaController extends Controller
 
     public function governorate()
     {
-
         $governorate = Governorate::all();
-
         return $this->returnData('governorate', $governorate, 'successfully');
     }
 

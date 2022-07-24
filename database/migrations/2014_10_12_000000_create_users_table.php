@@ -20,6 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->string('phone_number')->nullable();
             $table->boolean('is_active')->default(1);
+            $table->boolean('verify')->default(0);
             $table->enum('user_type', ['admin','client','representative','employee','company','speradmin'])->default('client');
             $table->text('token')->nullable();
             $table->integer('firebase_id')->nullable();

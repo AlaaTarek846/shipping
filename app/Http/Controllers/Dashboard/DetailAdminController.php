@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Mail;
 class DetailAdminController extends Controller
 {
     use GeneralTrait;
-
     /**
      * Display a listing of the resource.
      *
@@ -39,7 +38,7 @@ class DetailAdminController extends Controller
         $data = [];
 
         foreach ($allpackage as $index=>$package){
-
+            $data['package'][$index]['id'] = $package->id;
             $data['package'][$index]['name_ar'] = $package->name_ar;
             $data['package'][$index]['name'] = $package->name;
             $data['package'][$index]['count_user'] = $package->user->count();
@@ -61,7 +60,7 @@ class DetailAdminController extends Controller
     public function allAdminNewMonth()
     {
         //    - جدول يحتول على بيانات كافة المشتركين الجديد فى نفس اليوم
-        $admin = User::whereMonth('created_at',now()->format('m'))->where('user_type','admin')->get();
+        $admin = User::with('packageUser')->whereMonth('created_at',now()->format('m'))->where('user_type','admin')->get();
         return $this->returnData('admin', $admin, 'successfully');
 
     }
