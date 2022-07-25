@@ -126,7 +126,7 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
 
     Route::get('dashboard/all-Package', [PackageDetailController::class, 'index']);
 
-    Route::post('dashboard/create-PackageUser/{id}', [PackageUserController::class, 'store']);
+    Route::post('dashboard/create-PackageUser/{id}', [PackageUserController::class, 'storePackage']);
 
     Route::post('dashboard/storeone/{id}', [PackageUserController::class, 'storeone']);
 
@@ -143,8 +143,8 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
 
     Route::post('dashboard/Fatoorah', [FatoorahController::class, 'index']);
     Route::get('callBackUrl', [PackageUserController::class, 'callBackUrl']);
-    Route::post('errorUrl', [PackageUserController::class, 'errorUrl']);
-    Route::post('errorUrlUpdate', [PackageUserController::class, 'errorUrlUpdate']);
+    Route::get('errorUrl', [PackageUserController::class, 'errorUrl']);
+    Route::get('errorUrlUpdate', [PackageUserController::class, 'errorUrlUpdate']);
 
 
 
@@ -581,6 +581,7 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
         Route::Resource('PackageUser', PackageUserController::class);
 
         /*===  Start Rout Detail  Admin   ====*/
+        Route::get('adminExpireDatePackage', [DetailAdminController::class, 'adminExpireDatePackage']);
         Route::get('all-admin-day', [DetailAdminController::class, 'allAdminNewDay']);
         Route::get('all-Count-Package', [DetailAdminController::class, 'allCountPackage']);
         Route::get('all-admin-new-month', [DetailAdminController::class, 'allAdminNewMonth']);

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Mail\khaled;
+use App\Mail\Fatorah;
 use App\Mail\SendMailMyFatorah;
 use App\Models\Package;
 use App\Models\PackageUser;
@@ -76,6 +76,26 @@ class DetailAdminController extends Controller
 
     }
 
+    public function  adminExpireDatePackage(){
+
+//        $pakage_user =PackageUser::where('user_id',$user->id)->latest()->first();
+
+        $admin = User::whereDate('package_date', '>=', now()->format('Y-m-d'))
+            ->where('is_active',0)->get();
+        $data = [];
+        foreach ($admin as $item){
+            $package = $item->packageUser->where('active_status',0)->last();
+            if ($package){
+                unset($item['packageUser']);
+                $data[] =$item;
+            }
+        }
+
+
+        return $this->returnData('admin', $data, 'successfully');
+
+    }
+
 
 
     /**
@@ -129,10 +149,13 @@ class DetailAdminController extends Controller
         $user->update([
             'is_active' => 1
         ]);
+
         $pakage_user =PackageUser::where('user_id',$user->id)->latest()->first();
         $pakage_user->update([
             'active_status' => 1,
         ]);
+        Mail::to($user->email)->send(new Fatorah($user));
+
         return $this->returnData('user', $user, 'successfully');
 
     }

@@ -21,12 +21,10 @@ class Fatorah extends Mailable
      *
      * @return void
      */
-    public  $fatoor;
     public  $user_fatoor;
 
-    public function __construct($data_fatoor,$user)
+    public function __construct($user)
     {
-        $this->fatoor = $data_fatoor;
         $this->user_fatoor = $user;
     }
 
@@ -37,6 +35,6 @@ class Fatorah extends Mailable
      */
     public function build()
     {
-        return $this->from('info@imansoliman.com', 'Admin')->markdown('mail.Fatorah',['fatoor' => $this->fatoor,'user'=>$this->user_fatoor]);
+        return $this->from('info@imansoliman.com', 'Innovations')->markdown('mail.Fatorah',['user'=>$this->user_fatoor]);
     }
 }
