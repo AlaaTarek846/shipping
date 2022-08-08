@@ -849,14 +849,14 @@ trait ShipmentTrait
 
         if ($calcCompany) {
             $calcCompany->update([
-                "shipment_price" => $shipment->shipping_price,
+                "shipment_price" =>$shipment->shipping_price * -1,
                 "company_id" => $shipment->user->company->id,
                 "shipment_status_id" => $shipment->shipment_status_id,
                 "shipment_id" => $shipment->id,
             ]);
         } else {
             CompanyShipmentDetails::create([
-                "shipment_price" => $shipment->shipping_price,
+                "shipment_price" =>$shipment->shipping_price * -1,
                 "company_id" => $shipment->user->company->id,
                 "shipment_status_id" => $shipment->shipment_status_id,
                 "shipment_id" => $shipment->id,
@@ -955,10 +955,10 @@ trait ShipmentTrait
 
         DetailShipmentRepresentative::create([
 
-               'representative_id' => $dateails_shipment['representative_id'],
-                'shipment_id' => $dateails_shipment['shipment_id'],
-                'shipment_status_id' => $dateails_shipment['shipment_status_id'],
-                'store_id' => $dateails_shipment['store_id'],
+            'representative_id' => $dateails_shipment['representative_id'],
+            'shipment_id' => $dateails_shipment['shipment_id'],
+            'shipment_status_id' => $dateails_shipment['shipment_status_id'],
+            'store_id' => $dateails_shipment['store_id'],
         ]);
 
         return 1;

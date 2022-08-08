@@ -29,7 +29,7 @@ class CompanyShipmentController extends Controller
     public function index()
     {
         $user_id = auth()->user()->id;
-        $shipment = Shipment::where('sender_id',$user_id)->with('area', 'client', 'representative', 'serviceType','shipmentstatu','additionalservice', 'store', 'user')->latest()->paginate(15);
+        $shipment = Shipment::where([['sender_id',$user_id],['admin_id',$this->idAdmin()]])->with('area', 'client', 'representative', 'serviceType','shipmentstatu','additionalservice', 'store', 'user')->latest()->paginate(15);
 
         return $this->returnData('shipment', $shipment, 'successfully');
     }
@@ -63,18 +63,27 @@ class CompanyShipmentController extends Controller
         where([
             ['sender_id',$user_id],
             ['shipment_status_id',1],
+            ['admin_id',$this->idAdmin()]
         ])->orWhere([
             ['sender_id',$user_id],
             ['shipment_status_id',2],
+            ['admin_id',$this->idAdmin()]
+
         ])->orWhere([
             ['sender_id',$user_id],
             ['shipment_status_id',3],
+            ['admin_id',$this->idAdmin()]
+
         ])->orWhere([
             ['sender_id',$user_id],
             ['shipment_status_id',4],
+            ['admin_id',$this->idAdmin()]
+
         ])->orWhere([
             ['sender_id',$user_id],
             ['shipment_status_id',5],
+            ['admin_id',$this->idAdmin()]
+
         ])->with('area', 'client', 'representative', 'serviceType','shipmentstatu','additionalservice', 'store', 'user')->latest()->paginate(2);
 
         return $this->returnData('shipment_current', $shipment_current, 'successfully');
@@ -89,6 +98,8 @@ class CompanyShipmentController extends Controller
         where([
             ['sender_id',$user_id],
             ['shipment_status_id',6],
+            ['admin_id',$this->idAdmin()]
+
         ])->with('area', 'client', 'representative', 'serviceType','shipmentstatu','additionalservice', 'store', 'user')->latest()->paginate(2);
 
         return $this->returnData('shipment_sent', $shipment_sent, 'successfully');
@@ -105,18 +116,28 @@ class CompanyShipmentController extends Controller
         where([
             ['sender_id',$user_id],
             ['shipment_status_id',7],
+            ['admin_id',$this->idAdmin()]
+
         ])->orWhere([
             ['sender_id',$user_id],
             ['shipment_status_id',8],
+            ['admin_id',$this->idAdmin()]
+
         ])->orWhere([
             ['sender_id',$user_id],
             ['shipment_status_id',9],
+            ['admin_id',$this->idAdmin()]
+
         ])->orWhere([
             ['sender_id',$user_id],
             ['shipment_status_id',10],
+            ['admin_id',$this->idAdmin()]
+
         ])->orWhere([
             ['sender_id',$user_id],
             ['shipment_status_id',11],
+            ['admin_id',$this->idAdmin()]
+
         ])->with('area', 'client', 'representative', 'serviceType','shipmentstatu','additionalservice', 'store', 'user')->latest()->paginate(2);
 
         return $this->returnData('shipment_finished', $shipment_finished, 'successfully');
@@ -144,27 +165,38 @@ class CompanyShipmentController extends Controller
             where([
                 ['id','=',$request->number_id],
                 ['sender_id',$user_id],
-                ['shipment_status_id',1]
+                ['shipment_status_id',1],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['id','<=',$request->number_id],
                 ['sender_id',$user_id],
-                ['shipment_status_id',2]
+                ['shipment_status_id',2],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['id','=',$request->number_id],
                 ['sender_id',$user_id],
-                ['shipment_status_id',3]
+                ['shipment_status_id',3],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['id','=',$request->number_id],
                 ['sender_id',$user_id],
-                ['shipment_status_id',4]
+                ['shipment_status_id',4],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['id','=',$request->number_id],
                 ['sender_id',$user_id],
-                ['shipment_status_id',5]
+                ['shipment_status_id',5],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['id','=',$request->number_id],
                 ['sender_id',$user_id],
-                ['shipment_status_id',6]
+                ['shipment_status_id',6],
+                ['admin_id',$this->idAdmin()]
             ])->first();
 
         }else{
@@ -185,19 +217,28 @@ class CompanyShipmentController extends Controller
             $get_all_Shipment = Shipment::
             where([
                 ['sender_id',$user_id],
-                ['shipment_status_id',1]
+                ['shipment_status_id',1],
+                ['admin_id',$this->idAdmin()]
             ])->orWhere([
                 ['sender_id',$user_id],
-                ['shipment_status_id',2]
+                ['shipment_status_id',2],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['sender_id',$user_id],
-                ['shipment_status_id',3]
+                ['shipment_status_id',3],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['sender_id',$user_id],
-                ['shipment_status_id',4]
+                ['shipment_status_id',4],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['sender_id',$user_id],
-                ['shipment_status_id',5]
+                ['shipment_status_id',5],
+                ['admin_id',$this->idAdmin()]
+
             ])
                 ->whereDate('created_at','<=',$end)
                 ->whereDate('created_at','>=',$start)
@@ -230,7 +271,9 @@ class CompanyShipmentController extends Controller
             where([
                 ['id','=',$request->number_id],
                 ['sender_id',$user_id],
-                ['shipment_status_id',6]
+                ['shipment_status_id',6],
+                ['admin_id',$this->idAdmin()]
+
             ])->first();
 
         }else{
@@ -251,7 +294,9 @@ class CompanyShipmentController extends Controller
             $get_all_Shipment = Shipment::
             where([
                 ['sender_id',$user_id],
-                ['shipment_status_id',6]
+                ['shipment_status_id',6],
+                ['admin_id',$this->idAdmin()]
+
             ])
                 ->whereDate('created_at','<=',$end)
                 ->whereDate('created_at','>=',$start)
@@ -284,23 +329,30 @@ class CompanyShipmentController extends Controller
             where([
                 ['id','=',$request->number_id],
                 ['sender_id',$user_id],
-                ['shipment_status_id',7]
+                ['shipment_status_id',7],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['id','=',$request->number_id],
                 ['sender_id',$user_id],
-                ['shipment_status_id',8]
+                ['shipment_status_id',8],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['id','=',$request->number_id],
                 ['sender_id',$user_id],
-                ['shipment_status_id',9]
+                ['shipment_status_id',9],
+                ['admin_id',$this->idAdmin()]
             ])->orWhere([
                 ['id','=',$request->number_id],
                 ['sender_id',$user_id],
-                ['shipment_status_id',10]
+                ['shipment_status_id',10],
+                ['admin_id',$this->idAdmin()]
             ])->orWhere([
                 ['id','=',$request->number_id],
                 ['sender_id',$user_id],
-                ['shipment_status_id',11]
+                ['shipment_status_id',11],
+                ['admin_id',$this->idAdmin()]
             ])->first();
 
         }else{
@@ -321,19 +373,28 @@ class CompanyShipmentController extends Controller
             $get_all_Shipment = Shipment::
             where([
                 ['sender_id',$user_id],
-                ['shipment_status_id',7]
+                ['shipment_status_id',7],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['sender_id',$user_id],
-                ['shipment_status_id',8]
+                ['shipment_status_id',8],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['sender_id',$user_id],
-                ['shipment_status_id',9]
+                ['shipment_status_id',9],
+                ['admin_id',$this->idAdmin()]
+
             ])->orWhere([
                 ['sender_id',$user_id],
-                ['shipment_status_id',10]
+                ['shipment_status_id',10],
+                ['admin_id',$this->idAdmin()]
             ])->orWhere([
                 ['sender_id',$user_id],
-                ['shipment_status_id',11]
+                ['shipment_status_id',11],
+                ['admin_id',$this->idAdmin()]
+
             ])
                 ->whereDate('created_at','<=',$end)
                 ->whereDate('created_at','>=',$start)
@@ -412,10 +473,12 @@ class CompanyShipmentController extends Controller
                 'phone' => $request->phone,
                 'phone_2' => $request->phone_2,
                 'photo' => $new_file,
+                'admin_id' => $this->idAdmin(),
+
 
             ]);
             //      ================= calculator  AdditionalService
-            $additional_service = AdditionalService::where('id', $request->additional_service_id)->first();
+            $additional_service = AdditionalService::where([['id', $request->additional_service_id],['admin_id' , $this->idAdmin()]])->first();
 
             $price_additional_service = 0;
             if ($additional_service) {
@@ -425,9 +488,9 @@ class CompanyShipmentController extends Controller
 
             //      ================= calculator  weight
 
-            $weight = Weight::first();
+            $weight = Weight::where('admin_id', $this->idAdmin())->first();
 
-            $weight_company = WeightCompany::where('company_id', $request->sender_id)->first();
+            $weight_company = WeightCompany::where([['company_id', auth()->user()->company->id],['admin_id',$this->idAdmin()]])->first();
             $weight_price = 0;
 
             if ($weight_company) {
@@ -442,8 +505,8 @@ class CompanyShipmentController extends Controller
 
             //      ================= calculator  shipping price
 
-            $shipping_area_price = ShippingAreaPrice::where('area_id', $request->area_id)->first();
-            $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id', $request->sender_id], ['area_id', $request->area_id]])->first();
+            $shipping_area_price = ShippingAreaPrice::where([['area_id', $request->area_id],['admin_id',$this->idAdmin()]])->first();
+            $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id', auth()->user()->company->id], ['area_id', $request->area_id],['admin_id',$this->idAdmin()]])->first();
             $transportation_price_shipping = 0;
 
             if ($company_shipping_area_price) {
@@ -478,6 +541,8 @@ class CompanyShipmentController extends Controller
                 'sender_id' => $user_id,
                 'store_id' => $request->store_id,
                 'additional_service_id' => $request->additional_service_id,
+                'admin_id' => $this->idAdmin(),
+
 
             ]);
             $shipment->area;
@@ -511,7 +576,7 @@ class CompanyShipmentController extends Controller
     {
         $user_id = auth()->user()->id;
 
-        $shipment = Shipment::where('sender_id',$user_id)->with('area', 'client', 'representative', 'serviceType','shipmentstatu','additionalservice', 'store', 'user')->findOrFail($id);
+        $shipment = Shipment::where([['sender_id',$user_id],['admin_id',$this->idAdmin()]])->with('area', 'client', 'representative', 'serviceType','shipmentstatu','additionalservice', 'store', 'user')->findOrFail($id);
 
         return $this->returnData('shipment', $shipment, 'successfully');
     }
@@ -533,8 +598,8 @@ class CompanyShipmentController extends Controller
                   $request->merge([$key => $value == "undefined" || $value == "null" ? null : $value]);
 
               //      =================update validate on Table  Models User and Client
-              $shipment = Shipment::findOrFail($id);
-              $client = Client::find($shipment->client_id);
+              $shipment = Shipment::where('admin_id',$this->idAdmin())->findOrFail($id);
+              $client = Client::where('admin_id',$this->idAdmin())->find($shipment->client_id);
 //
               $validation = Validator::make($request->all(), [
 
@@ -592,10 +657,11 @@ class CompanyShipmentController extends Controller
               $client->address = $request->address ?? $client->address;
               $client->phone = $request->phone ?? $client->phone;
               $client->phone_2 = $request->phone_2 ?? $client->phone_2;
+              $client->admin_id = $this->idAdmin()??$this->idAdmin();
 
               $client->update();
               //      ================= calculator  AdditionalService
-              $additional_service = AdditionalService::where('id', $request->additional_service_id)->first();
+              $additional_service = AdditionalService::where([['id', $request->additional_service_id],['admin_id',$this->idAdmin()]])->first();
               $price_additional_service = 0;
               if ($additional_service) {
                   $price_additional_service = $additional_service->price;
@@ -604,9 +670,9 @@ class CompanyShipmentController extends Controller
 
               //      ================= calculator  weight
 
-              $weight = Weight::first();
+              $weight = Weight::where('admin_id',$this->idAdmin())->first();
 
-              $weight_company = WeightCompany::where('company_id', $request->sender_id)->first();
+              $weight_company = WeightCompany::where([['company_id', auth()->user()->company->id],['admin_id',$this->idAdmin()]])->first();
               $weight_price = 0;
 
               if ($weight_company) {
@@ -621,14 +687,17 @@ class CompanyShipmentController extends Controller
 
               //      ================= calculator  shipping price
 
-              $shipping_area_price = ShippingAreaPrice::where('area_id', $request->area_id)->first();
-              $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id', $request->sender_id], ['area_id', $request->area_id]])->first();
+              $shipping_area_price = ShippingAreaPrice::where([['area_id', $request->area_id],['admin_id',$this->idAdmin()]])->first();
+              $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id', auth()->user()->company->id], ['area_id', $request->area_id],['admin_id',$this->idAdmin()]])->first();
               $transportation_price_shipping = 0;
 
               if ($company_shipping_area_price) {
+
                   $transportation_price_shipping = $company_shipping_area_price->transportation_price;
                   return $transportation_price_shipping;
+
               } elseif (!$company_shipping_area_price) {
+
                   $transportation_price_shipping = $shipping_area_price->transportation_price;
               }
 
@@ -654,6 +723,7 @@ class CompanyShipmentController extends Controller
               $shipment->store_id = $request->store_id ?? $shipment->store_id;
               $shipment->shipment_status_id = $request->shipment_status_id ?? $shipment->shipment_status_id;
               $shipment->additional_service_id = $request->additional_service_id ?? $shipment->additional_service_id;
+              $shipment->admin_id = $this->idAdmin()??$this->idAdmin();
 
               $shipment->update();
 

@@ -20,7 +20,7 @@ class AdvertisementController extends Controller
      */
     public function index()
     {
-        $advertisement = Advertisement::all();
+        $advertisement = Advertisement::where('admin_id',$this->idAdmin())->get();
 
         return $this->returnData('advertisement', $advertisement, 'successfully');
     }
@@ -75,6 +75,8 @@ class AdvertisementController extends Controller
             $advertisement = Advertisement::create([
 
                 'photo'=> $new_file,
+                'admin_id' => $this->idAdmin(),
+
             ]);
 
 
@@ -98,7 +100,7 @@ class AdvertisementController extends Controller
      */
     public function show($id)
     {
-        $advertisement = Advertisement::findOrFail($id);
+        $advertisement = Advertisement::where('admin_id',$this->idAdmin())->findOrFail($id);
         return $this->returnData('advertisement', $advertisement, 'successfully');
     }
 
@@ -142,7 +144,7 @@ class AdvertisementController extends Controller
 
             //      =================update  photo  App\Models\Admin
 
-            $advertisement = Advertisement::find($id);
+            $advertisement = Advertisement::where('admin_id',$this->idAdmin())->find($id);
             $name = $advertisement->photo;
 
             if ($request->hasFile('photo')) {
@@ -156,7 +158,7 @@ class AdvertisementController extends Controller
             }
 
 
-
+            $advertisement->admin_id = $this->idAdmin()??$this->idAdmin();
             $advertisement->update();
             DB::commit();
 
@@ -178,7 +180,7 @@ class AdvertisementController extends Controller
      */
     public function destroy($id)
     {
-        $advertisement = Advertisement::find($id);
+        $advertisement = Advertisement::where('admin_id',$this->idAdmin())->find($id);
 
             if ($advertisement->photo !== null) {
                 unlink(public_path('uploads/advertisement/') . $advertisement->photo);

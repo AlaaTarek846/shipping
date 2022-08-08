@@ -21,7 +21,7 @@ class IncomeController extends Controller
     public function index()
     {
 
-        $income = Income::with('children')->where('income_id','=',null)->get();
+        $income = Income::with('children')->where([['income_id','=',null],['admin_id',$this->idAdmin()]])->get();
 
         return $this->returnData('income', $income, 'successfully');
     }
@@ -29,7 +29,7 @@ class IncomeController extends Controller
     public function index_income()
     {
 
-        $income = Income::all();
+        $income = Income::where('admin_id',$this->idAdmin())->get();
 
         return $this->returnData('income', $income, 'successfully');
     }
@@ -37,7 +37,7 @@ class IncomeController extends Controller
     public function mainIncome()
     {
 
-        $income = Income::where('income_id',null)->get();
+        $income = Income::where([['income_id',null],['admin_id',$this->idAdmin()]])->get();
 
         return $this->returnData('income', $income, 'successfully');
     }
@@ -70,12 +70,19 @@ class IncomeController extends Controller
             if($request->income_id == 0 || $request->income_id == null){
 
 
-                $income = new Income($request->except('income_id'));
+                $income = new Income([
+                    'label' => $request->label,
+                    'admin_id' => $this->idAdmin(),
+                ]);
                 $income->save();
 
             }else{
 
-                $income = new Income($request->all());
+                $income = new Income([
+                    'label' => $request->label,
+                    'income_id' => $request->income_id,
+                    'admin_id' => $this->idAdmin(),
+                ]);
                 $income->save();
             }
 
@@ -97,7 +104,7 @@ class IncomeController extends Controller
     public function show($id)
     {
 
-        $income = Income::find($id);
+        $income = Income::where('admin_id',$this->idAdmin())->find($id);
         return $this->returnData('income',$income, 'successfully');
     }
 
@@ -126,8 +133,11 @@ class IncomeController extends Controller
                 return $this->returnError('errors', $validation->errors());
 
             }
-            $income = Income::findOrFail($id);
-            $income->update($request->all());
+            $income = Income::where('admin_id',$this->idAdmin())->findOrFail($id);
+            $income->label = $request->label??$income->label;
+            $income->income_id = $request->income_id??$income->income_id;
+            $income->admin_id = $this->idAdmin()??$this->idAdmin();
+            $income->update();
 
             return $this->returnData('income', $income, 'successfully');
 
@@ -147,7 +157,7 @@ class IncomeController extends Controller
      */
     public function destroy($id)
     {
-        $income = Income::findOrFail($id);
+        $income = Income::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         if (count($income->children) > 0 || count($income->offer) > 0  )
         {

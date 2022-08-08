@@ -322,7 +322,7 @@ use App\Http\Controllers\Mobile\DetailShipmentRepresentativeShipmentController;
         Route::post('update-shipment/{id}', [ShipmentController::class, 'update']);
         Route::post('update-shipment_representatives', [ShipmentController::class, 'update_shipment_representatives']);
         Route::post('show-shipment/{id}', [ShipmentController::class, 'show']);
-        Route::post('destroy-shipment/{id}', [ShipmentController::class, 'destroy']);
+        Route::delete('destroy-shipment/{id}', [ShipmentController::class, 'destroy']);
 
         /*===  Start Rout Import Shipment   ====*/
         Route::post('/import-shipment/{user_id}', [ImportExportController::class, 'import']);

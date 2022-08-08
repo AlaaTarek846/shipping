@@ -17,7 +17,7 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $role =  Role::all();
+        $role =  Role::where('admin_id',$this->idAdmin())->get();
 
         return $this->returnData('roles', $role, 'successfully');
 

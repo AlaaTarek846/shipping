@@ -25,21 +25,21 @@ class TreasurieController extends Controller
     public function index()
     {
 
-        $treasuries = Treasury::where('treasury_id',null)->with('children')->get();
+        $treasuries = Treasury::where([['treasury_id',null],['admin_id',$this->idAdmin()]])->with('children')->get();
 
         return $this->returnData('treasuries', $treasuries, 'successfully');
     }
     public function index_treasuries()
     {
 
-        $treasuries = Treasury::all();
+        $treasuries = Treasury::where('admin_id',$this->idAdmin())->get();
 
         return $this->returnData('treasuries', $treasuries, 'successfully');
     }
 
     public function id_children_treasuries($id){
 
-        $treasuries = Treasury::where('treasury_id',$id)->get();
+        $treasuries = Treasury::where([['treasury_id',$id],['admin_id',$this->idAdmin()]])->get();
 
         return $this->returnData('children_treasuries', $treasuries, 'successfully');
     }
@@ -47,7 +47,7 @@ class TreasurieController extends Controller
     public function mainTreasury()
     {
 
-        $treasuries = Treasury::where('treasury_id',null)->get();
+        $treasuries = Treasury::where([['treasury_id',null],['admin_id',$this->idAdmin()]])->get();
 
         return $this->returnData('treasuries', $treasuries, 'successfully');
     }
@@ -78,12 +78,19 @@ class TreasurieController extends Controller
 
             if($request->treasury_id == 0 || $request->treasury_id == null){
 
-                $treasuries = new Treasury($request->except('treasury_id'));
+                $treasuries = new Treasury([
+                    'label' => $request->label,
+                    'admin_id' => $this->idAdmin(),
+                ]);
                 $treasuries->save();
 
             }else{
 
-                $treasuries = new Treasury($request->all());
+                $treasuries = new Treasury([
+                    'label' => $request->label,
+                    'treasury_id' => $request->treasury_id,
+                    'admin_id' => $this->idAdmin(),
+                ]);
                 $treasuries->save();
             }
             return $this->returnData('treasuries', $treasuries, 'successfully');
@@ -103,7 +110,7 @@ class TreasurieController extends Controller
      */
     public function show($id)
     {
-        $treasuries = Treasury::with('children')->find($id);
+        $treasuries = Treasury::where('admin_id',$this->idAdmin())->with('children')->find($id);
         return $this->returnData('treasuries',$treasuries, 'successfully');
     }
 
@@ -132,8 +139,11 @@ class TreasurieController extends Controller
                 return $this->returnError('errors', $validation->errors());
 
             }
-            $treasuries = Treasury::findOrFail($id);
-            $treasuries->update($request->all());
+            $treasuries = Treasury::where('admin_id',$this->idAdmin())->findOrFail($id);
+            $treasuries->label = $request->label??$treasuries->label;
+            $treasuries->treasury_id = $request->treasury_id??$treasuries->treasury_id;
+            $treasuries->admin_id = $this->idAdmin()??$this->idAdmin();
+            $treasuries->update();
             $treasuries->treasury_child;
 
             return $this->returnData('treasuries', $treasuries, 'successfully');
@@ -154,7 +164,7 @@ class TreasurieController extends Controller
      */
     public function destroy($id)
     {
-        $treasuries = Treasury::findOrFail($id);
+        $treasuries = Treasury::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         $treasuries->delete();
         return response()->json("deleted successfully");

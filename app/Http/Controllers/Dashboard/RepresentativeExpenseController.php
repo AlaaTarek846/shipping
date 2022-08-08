@@ -29,10 +29,10 @@ class RepresentativeExpenseController extends Controller
         $start = Carbon::parse($request->start_date)->format('Y-m-d');
         $end = Carbon::parse($request->end_date)->format('Y-m-d');
 
-        $representative_expense = RepresentativeExpense::with('treasury')->whereDate('created_at','<=',$end)
+        $representative_expense = RepresentativeExpense::where('admin_id',$this->idAdmin())->with('treasury')->whereDate('created_at','<=',$end)
             ->whereDate('created_at','>=',$start)->get();
         $representative_income = RepresentativeIncome::with('representative','shipment')->whereDate('created_at','<=',$end)
-            ->whereDate('created_at','>=',$start)->get();
+            ->whereDate('created_at','>=',$start)->where('admin_id',$this->idAdmin())->get();
 
         /* 1*/
         $data['representative_expense'] = $representative_expense;
@@ -75,7 +75,14 @@ class RepresentativeExpenseController extends Controller
 
             }
 
-            $representative_expense = new RepresentativeExpense($request->all());
+            $representative_expense = new RepresentativeExpense([
+
+                'amount' => $request->amount,
+                'notes' => $request->notes,
+                'treasurie_id' => $request->treasurie_id,
+                'admin_id' => $this->idAdmin(),
+
+            ]);
             $representative_expense->save();
 
 
@@ -120,8 +127,12 @@ class RepresentativeExpenseController extends Controller
                 return $this->returnError('errors', $validation->errors());
 
             }
-            $representative_expense = RepresentativeExpense::findOrFail($id);
-            $representative_expense->update($request->all());
+            $representative_expense = RepresentativeExpense::where('admin_id',$this->idAdmin())->findOrFail($id);
+            $representative_expense->amount = $request->amount??$representative_expense->amount;
+            $representative_expense->notes = $request->notes??$representative_expense->notes;
+            $representative_expense->treasurie_id = $request->treasurie_id??$representative_expense->treasurie_id;
+            $representative_expense->admin_id = $this->idAdmin()??$this->idAdmin();
+            $representative_expense->update();
 
             return $this->returnData('representative_expense', $representative_expense, 'successfully');
 
@@ -141,7 +152,7 @@ class RepresentativeExpenseController extends Controller
      */
     public function destroy($id)
     {
-        $representative_expense = RepresentativeExpense::findOrFail($id);
+        $representative_expense = RepresentativeExpense::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         $representative_expense->delete();
         return response()->json("deleted successfully");    }

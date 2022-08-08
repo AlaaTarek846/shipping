@@ -82,13 +82,16 @@ class DetailAdminController extends Controller
 
         $admin = User::whereDate('package_date', '>=', now()->format('Y-m-d'))
             ->where('is_active',0)->get();
+
         $data = [];
         foreach ($admin as $item){
             $package = $item->packageUser->where('active_status',0)->last();
+            $paymentTypePackage = $item->paymentTypePackage->last();
             if ($package){
                 unset($item['packageUser']);
                 $data[] =$item;
             }
+            $data[] = $paymentTypePackage;
         }
 
 

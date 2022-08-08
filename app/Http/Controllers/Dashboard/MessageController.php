@@ -21,7 +21,7 @@ class MessageController extends Controller
      */
     public function index()
     {
-        $messages = Message::all();
+        $messages = Message::where('admin_id',$this->idAdmin())->get();
 
         return $this->returnData('messages', $messages, 'successfully');
 
@@ -45,7 +45,12 @@ class MessageController extends Controller
                 return $this->returnError('errors', $validation->errors());
 
             }
-            $messages = new Message($request->all());
+            $messages = new Message([
+
+                'text' => $request->text,
+                'admin_id' => $this->idAdmin(),
+
+            ]);
             $messages->save();
             return $this->returnData('messages', $messages, 'successfully');
 
@@ -86,8 +91,10 @@ class MessageController extends Controller
                 return $this->returnError('errors', $validation->errors());
 
             }
-            $messages = Message::findOrFail($id);
-            $messages->update($request->all());
+            $messages = Message::where('admin_id',$this->idAdmin())->findOrFail($id);
+            $messages->text = $request->text??$messages->text;
+            $messages->admin_id = $this->idAdmin()??$this->idAdmin();
+            $messages->update();
 
             return $this->returnData('messages', $messages, 'successfully');
         } catch (\Exception $e) {
@@ -104,7 +111,7 @@ class MessageController extends Controller
      */
     public function destroy($id)
     {
-        $messages = Message::findOrFail($id);
+        $messages = Message::where('admin_id',$this->idAdmin())->findOrFail($id);
 
 
         $messages->delete();

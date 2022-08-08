@@ -36,11 +36,11 @@ class FilterController extends Controller
             });
         })->where(function ($q) use($request){
             $q->when($request->shipment_status_id ,function ($q) use($request){
-               $q->where('shipment_status_id',$request->shipment_status_id);
+               $q->where([['shipment_status_id',$request->shipment_status_id],['admin_id',$this->idAdmin()]]);
             });
         })->where(function ($q) use($request){
             $q->when($request->representative_id ,function ($q) use($request){
-               $q->where('representative_id',$request->representative_id);
+               $q->where([['representative_id',$request->representative_id],['admin_id',$this->idAdmin()]]);
             });
         })
         ->where(function ($q) use($request){

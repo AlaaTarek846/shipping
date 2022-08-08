@@ -44,9 +44,9 @@ class RepresentativeShipmentController extends Controller
         $data = [];
         $start = Carbon::parse($request->date);
 
-        $total_collection_balance =  RepresentativeAccountDetail::whereDate('created_at', $start->format('Y-m-d'))->sum('collection_balance');
+        $total_collection_balance =  RepresentativeAccountDetail::whereDate('created_at', $start->format('Y-m-d'))->where('admin_id',$this->idAdmin())->sum('collection_balance');
 
-        $total_commission =  RepresentativeAccountDetail::whereDate('created_at', $start->format('Y-m-d'))->sum('commission');
+        $total_commission =  RepresentativeAccountDetail::whereDate('created_at', $start->format('Y-m-d'))->where('admin_id',$this->idAdmin())->sum('commission');
 
         $total = $total_collection_balance + $total_commission;
 
@@ -67,7 +67,8 @@ class RepresentativeShipmentController extends Controller
         $representative_account = RepresentativeAccountDetail::with('representative', 'representative_account', 'shipment', 'shipmentstatu')->
         where([
             ['representative_id', $id],
-            ['representative_account_id', null]
+            ['representative_account_id', null],
+            ['admin_id',$this->idAdmin()]
         ])->get();
         return $this->returnData('representative_account', $representative_account, 'successfully');
 
@@ -78,7 +79,9 @@ class RepresentativeShipmentController extends Controller
         $account_detail = RepresentativeAccountDetail::with('representative', 'representative_account', 'shipment', 'shipmentstatu')->
         where([
             ['representative_id', $id],
-            ['representative_account_id', '!=', null]
+            ['representative_account_id', '!=', null],
+            ['admin_id',$this->idAdmin()]
+
         ])->get();
 
         return $this->returnData('account_detail', $account_detail, 'successfully');
@@ -88,7 +91,7 @@ class RepresentativeShipmentController extends Controller
     public function Total_account($id)
     {
         $Total_account = RepresentativeAccount::with('representative_account_detail')->
-        where('representative_id', $id,)->get();
+        where([['representative_id', $id,],['admin_id',$this->idAdmin()]])->get();
 
         return $this->returnData('Total_account', $Total_account, 'successfully');
 

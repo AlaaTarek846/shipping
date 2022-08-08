@@ -21,7 +21,7 @@ class MapController extends Controller
      */
     public function index()
     {
-        $maps = Map::with('representative','shipment')->get();
+        $maps = Map::where('admin_id',$this->idAdmin())->with('representative','shipment')->get();
 
         return $this->returnData('maps', $maps, 'successfully');
     }
@@ -51,7 +51,14 @@ class MapController extends Controller
 
             }
 
-            $maps = new Map($request->all());
+            $maps = new Map([
+                'status' =>$request->status,
+                'distance' =>$request->distance,
+                'location' =>$request->location,
+                'representative_id' =>$request->representative_id,
+                'shipment_id' =>$request->shipment_id,
+                'admin_id' => $this->idAdmin(),
+            ]);
 
 
             $maps->save();

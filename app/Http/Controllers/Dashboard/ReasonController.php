@@ -21,7 +21,7 @@ class ReasonController extends Controller
      */
     public function index()
     {
-        $reason = Reason::with('shipment')->get();
+        $reason = Reason::where('admin_id',$this->idAdmin())->with('shipment')->get();
 
         return $this->returnData('reason', $reason, 'successfully');
 
@@ -45,7 +45,10 @@ class ReasonController extends Controller
                 return $this->returnError('errors', $validation->errors());
 
             }
-            $reason = new Reason($request->all());
+            $reason = new Reason([
+                'name' => $request->name,
+                'admin_id' => $this->idAdmin(),
+            ]);
             $reason->save();
             return $this->returnData('reason', $reason, 'successfully');
 
@@ -63,7 +66,7 @@ class ReasonController extends Controller
      */
     public function show($id)
     {
-        $reason = Reason::findOrFail($id);
+        $reason = Reason::where('admin_id',$this->idAdmin())->findOrFail($id);
         return $reason;
     }
 
@@ -86,8 +89,10 @@ class ReasonController extends Controller
                 return $this->returnError('errors', $validation->errors());
 
             }
-            $reason = Reason::findOrFail($id);
-            $reason->update($request->all());
+            $reason = Reason::where('admin_id',$this->idAdmin())->findOrFail($id);
+            $reason->name = $request->name??$reason->name;
+            $reason->admin_id = $this->idAdmin()??$this->idAdmin();
+            $reason->update();
 
             return $this->returnData('reason', $reason, 'successfully');
         } catch (\Exception $e) {
@@ -104,7 +109,7 @@ class ReasonController extends Controller
      */
     public function destroy($id)
     {
-        $reason = Reason::findOrFail($id);
+        $reason = Reason::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         $reason->delete();
         return response()->json("deleted successfully");

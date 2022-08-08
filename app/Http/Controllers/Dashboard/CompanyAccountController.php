@@ -22,7 +22,7 @@ class CompanyAccountController extends Controller
      */
     public function index()
     {
-        $company_account = CompanyAccount::with('company')->get();
+        $company_account = CompanyAccount::with('company')->where('admin_id',$this->idAdmin())->get();
 
         return $this->returnData('company_account', $company_account, 'successfully');
 
@@ -49,7 +49,9 @@ class CompanyAccountController extends Controller
 
             $price = 0;
             $total_company_account = CompanyAccount::create([
-                'company_id' => $request->company_id
+                'company_id' => $request->company_id,
+                'admin_id' => $this->idAdmin(),
+
             ]);
 
             foreach ($request->company_accounts as $company_account) {

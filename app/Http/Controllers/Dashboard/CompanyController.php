@@ -98,7 +98,7 @@ class CompanyController extends Controller
                 ['sender_id' , $company->user->id],
                 ['admin_id',$this->idAdmin()]
 
-            ])->sum('shipping_price');
+            ])->get()->sum('total_shipment');
 
             $balance = CompanyShipmentDetails::where([
                 ['company_id',$company->id],

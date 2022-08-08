@@ -20,7 +20,7 @@ class ContactMessageController extends Controller
      */
     public function index()
     {
-        $contact_message = ContactMessage::all();
+        $contact_message = ContactMessage::where('admin_id',$this->idAdmin())->get();
 
         return $this->returnData('contact_message', $contact_message, 'successfully');
     }
@@ -49,7 +49,13 @@ class ContactMessageController extends Controller
 
             }
 
-            $contact_message = new ContactMessage($request->all());
+            $contact_message = new ContactMessage([
+                'name' =>$request->name,
+                'phone' =>$request->phone,
+                'email' =>$request->email,
+                'messages' =>$request->messages,
+                'admin_id' => $this->idAdmin(),
+            ]);
             $contact_message->save();
             return $this->returnData('contact_message', $contact_message, 'successfully');
 
@@ -134,7 +140,7 @@ class ContactMessageController extends Controller
      */
     public function destroy($id)
     {
-        $contact_message = ContactMessage::find($id);
+        $contact_message = ContactMessage::where('admin_id',$this->idAdmin())->find($id);
         $contact_message->destroy($id);
         return response()->json("deleted successfully");
 

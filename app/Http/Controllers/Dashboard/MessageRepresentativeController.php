@@ -20,7 +20,7 @@ class MessageRepresentativeController extends Controller
      */
     public function index()
     {
-        $message_representative = MessageRepresentative::with('Representative')->get();
+        $message_representative = MessageRepresentative::where('admin_id',$this->idAdmin())->with('Representative')->get();
 
         return $this->returnData('message_representative', $message_representative, 'successfully');
     }
@@ -47,7 +47,11 @@ class MessageRepresentativeController extends Controller
 
             }
 
-            $message_representative = new MessageRepresentative($request->all());
+            $message_representative = new MessageRepresentative([
+                'title' => $request->title,
+                'representative_id' => $request->representative_id,
+                'admin_id' => $this->idAdmin(),
+            ]);
             if ($request->hasFile('photo')) {
                 $file = $request->photo;
                 $new_file = time() . $file->getClientOriginalName();
@@ -101,11 +105,8 @@ class MessageRepresentativeController extends Controller
                 return $this->returnError('errors', $validation->errors());
 
             }
-            $message_representative = MessageRepresentative::findOrFail($id);
+            $message_representative = MessageRepresentative::where('admin_id',$this->idAdmin())->findOrFail($id);
             $name = $message_representative->photo;
-
-            $message_representative->update($request->all());
-
             if ($request->hasFile('photo')) {
                 if ($name !== null) {
                     unlink(public_path('/uploads/message_representative/') . $name);
@@ -115,6 +116,13 @@ class MessageRepresentativeController extends Controller
                 $file->move(public_path() . '/uploads/message_representative', $new_file);
                 $message_representative->photo = $new_file;
             }
+
+            $message_representative->title =$request->title??$message_representative->title;
+            $message_representative->representative_id =$request->representative_id??$message_representative->representative_id;
+            $message_representative->admin_id = $this->idAdmin()??$this->idAdmin();
+            $message_representative->update();
+
+
             $message_representative->Representative;
 
             return $this->returnData('message_representative', $message_representative, 'successfully');
@@ -135,7 +143,7 @@ class MessageRepresentativeController extends Controller
      */
     public function destroy($id)
     {
-        $message_representative = MessageRepresentative::findOrFail($id);
+        $message_representative = MessageRepresentative::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         $message_representative->delete();
         return response()->json("deleted successfully");

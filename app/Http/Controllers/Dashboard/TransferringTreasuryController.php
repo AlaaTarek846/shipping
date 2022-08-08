@@ -20,7 +20,7 @@ class TransferringTreasuryController extends Controller
      */
     public function index()
     {
-        $transferring_treasury = TransferringTreasury::with('user','treasury_start','treasury_end')->get();
+        $transferring_treasury = TransferringTreasury::where('admin_id',$this->idAdmin())->with('user','treasury_start','treasury_end')->get();
         return $this->returnData('transferring_treasury', $transferring_treasury, 'successfully');
 
     }
@@ -55,6 +55,7 @@ class TransferringTreasuryController extends Controller
                 'user_id' => $user_id,
                 'treasurie_start_id' => $request->treasurie_start_id,
                 'treasurie_end_id' => $request->treasurie_end_id,
+                'admin_id' => $this->idAdmin(),
 
             ]);
 
@@ -102,14 +103,14 @@ class TransferringTreasuryController extends Controller
             {
                 return $this->returnError('errors', $validation->errors());
             }
-            $transferring_treasury = TransferringTreasury::findOrFail($id);
+            $transferring_treasury = TransferringTreasury::where('admin_id',$this->idAdmin())->findOrFail($id);
 
             $user_id = auth()->user()->id;
             $transferring_treasury->user_id = $user_id;
             $transferring_treasury->price = $request->price;
             $transferring_treasury->treasurie_start_id = $request->treasurie_start_id;
             $transferring_treasury->treasurie_end_id = $request->treasurie_end_id;
-
+            $transferring_treasury->admin_id = $this->idAdmin()??$this->idAdmin();
 
             $transferring_treasury->update();
 
@@ -129,7 +130,7 @@ class TransferringTreasuryController extends Controller
      */
     public function destroy($id)
     {
-        $transferring_treasury = TransferringTreasury::findOrFail($id);
+        $transferring_treasury = TransferringTreasury::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         $transferring_treasury->delete();
         return response()->json("deleted successfully");

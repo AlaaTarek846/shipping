@@ -30,9 +30,9 @@ class RepresentativeAccountController extends Controller
         $representative_id = auth()->user()->representative->id;
         $date =[];
 
-        $Representative_commissions = RepresentativeAccount::where('representative_id',$representative_id)->sum('total_commissions');
+        $Representative_commissions = RepresentativeAccount::where([['representative_id',$representative_id],['admin_id',$this->idAdmin()]])->sum('total_commissions');
 
-        $Representative_collection_balance = RepresentativeAccount::where('representative_id',$representative_id)->sum('collection_balance');
+        $Representative_collection_balance = RepresentativeAccount::where([['representative_id',$representative_id],['admin_id',$this->idAdmin()]])->sum('collection_balance');
 
         $date['collection_balance'] = $Representative_collection_balance;
 
@@ -67,6 +67,7 @@ class RepresentativeAccountController extends Controller
             $account_detail = RepresentativeAccountDetail::where([
                 ['representative_account_id',"!=", null],
                 ['id', $representative_account],
+                ['admin_id',$this->idAdmin()]
             ])->first();
             if ($account_detail)
             {
@@ -83,7 +84,7 @@ class RepresentativeAccountController extends Controller
 
         foreach ($request->representative_accounts as $representative_account) {
 
-            $account_detail = RepresentativeAccountDetail::find($representative_account);
+            $account_detail = RepresentativeAccountDetail::where('admin_id',$this->idAdmin())->find($representative_account);
 
             $total_price += $account_detail->collection_balance;
 
@@ -135,7 +136,7 @@ class RepresentativeAccountController extends Controller
             //      =================update validate on Table  Models User and Client
             $representative_id  = auth()->user()->representative->id;
 
-            $shipment = Shipment::where('representative_id',$representative_id)->findOrFail($id);
+            $shipment = Shipment::where([['representative_id',$representative_id],['admin_id',$this->idAdmin()]])->findOrFail($id);
             $validation = Validator::make($request->all(), [
 
                 'notes' => 'nullable|string',
@@ -152,6 +153,7 @@ class RepresentativeAccountController extends Controller
             $shipment->return_price = $request->return_price??$shipment->return_price;
             $shipment->reason_id = $request->reason_id;
             $shipment->shipment_status_id = $request->shipment_status_id??$shipment->shipment_status_id;
+            $shipment->admin_id = $this->idAdmin()??$this->idAdmin();
 
             $shipment->update();
 

@@ -31,29 +31,29 @@ class TotalAccountController extends Controller
         $data = [];
 
         /* 01- احصائية باجمالي  المتحصلات النقدية خلال يوم فتح الداش بورد */
-        $total_day_shipment = RepresentativeAccountDetail::whereDate('created_at', now()->format('Y-m-d'))->sum('collection_balance');
+        $total_day_shipment = RepresentativeAccountDetail::where('admin_id',$this->idAdmin())->whereDate('created_at', now()->format('Y-m-d'))->sum('collection_balance');
 
         /* 02- احصائية بعدد الشحنات المطلوب تسليمها خلال يوم فتح الداش بورد */
-        $shipment = Shipment::where('shipment_status_id', 6)->whereDate('delivery_date', now()->format('Y-m-d'))->count();
+        $shipment = Shipment::where([['shipment_status_id', 6],['admin_id',$this->idAdmin()]])->whereDate('delivery_date', now()->format('Y-m-d'))->count();
 
         /* 03- احصائية بأجمالي ال COD  المستحقة لكل العملاء  */
-        $total_cod = CompanyShipmentDetails::whereDate('created_at', now()->format('Y-m-d'))->get();
+        $total_cod = CompanyShipmentDetails::where('admin_id',$this->idAdmin())->whereDate('created_at', now()->format('Y-m-d'))->get();
         $total_price_cod = 0;
         foreach ($total_cod as $cod) {
             $total_price_cod += ($cod->shipment_price + $cod->shipment->shipping_price);
         }
         /* 04-احصائية بمستحقات المناديب فى يوم فتح الداش بورد */
-        $total_day_commission = RepresentativeAccountDetail::whereDate('created_at', now()->format('Y-m-d'))->sum('commission');
+        $total_day_commission = RepresentativeAccountDetail::where('admin_id',$this->idAdmin())->whereDate('created_at', now()->format('Y-m-d'))->sum('commission');
 
         /* 05- احصائية بعدد العملاء لدي شركة الشحن */
-        $conut_client = Client::where('user_id', '!=', null)->count();
+        $conut_client = Client::where([['user_id', '!=', null],['admin_id',$this->idAdmin()]])->count();
 
         /*06- احصائية بعدد العملاء الجدد  */
         $conut_client_new = Client::
         where(function ($q) {
             $q->whereYear('created_at', now()->format('Y'))
                 ->whereMonth('created_at', now()->format('m'))
-                ->where('user_id', '!=', null);
+                ->where([['user_id', '!=', null],['admin_id',$this->idAdmin()]]);
 
         })->count();
 
@@ -61,37 +61,38 @@ class TotalAccountController extends Controller
         $count_Shipment_return = Shipment::
         where(function ($q) {
             $q->whereDate('updated_at', now()->format('Y-m-d'))
-                ->where('shipment_status_id', 8);
+                ->where([['shipment_status_id', 8],['admin_id',$this->idAdmin()]])
+                ->orWhere('admin_id',$this->idAdmin());
         })
             ->orWhere(function ($q) {
                 $q->whereDate('updated_at', now()->format('Y-m-d'))
-                    ->where('shipment_status_id', 9);
+                    ->where([['shipment_status_id', 9],['admin_id',$this->idAdmin()]]);
             })
             ->orWhere(function ($q) {
                 $q->whereDate('updated_at', now()->format('Y-m-d'))
-                    ->where('shipment_status_id', 10);
+                    ->where([['shipment_status_id', 10],['admin_id',$this->idAdmin()]]);
             })
             ->orWhere(function ($q) {
                 $q->whereDate('updated_at', now()->format('Y-m-d'))
-                    ->where('shipment_status_id', 11);
+                    ->where([['shipment_status_id', 11],['admin_id',$this->idAdmin()]]);
             })->count();
 
         /* 08 - احصائية بمتوسط التسليمات    */
         $count_Shipment_average = Shipment::
-        where('shipment_status_id', 7)
-            ->orWhere('shipment_status_id', 8)
-            ->orWhere('shipment_status_id', 10)->count();
+        where([['shipment_status_id', 7],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id', 8],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id', 10],['admin_id',$this->idAdmin()]])->count();
 
         /* 09- احصائية باكثر المناطق طلب شحن */
-        $max_shipping_area = Area::withCount('shipment')->orderBy('shipment_count', 'desc')->get()->where('shipment_count', '>', 0)->take(3);
+        $max_shipping_area = Area::withCount('shipment')->orderBy('shipment_count', 'desc')->get()->where([['shipment_count', '>', 0],['admin_id',$this->idAdmin()]])->take(3);
 
         /* 10  - احصائية باقل المناطق طلب شحن   */
-        $min_shipping_area = Area::withCount('shipment')->orderBy('shipment_count', 'asc')->get()->where('shipment_count', '>', 0)->take(3);
+        $min_shipping_area = Area::withCount('shipment')->orderBy('shipment_count', 'asc')->get()->where([['shipment_count', '>', 0],['admin_id',$this->idAdmin()]])->take(3);
 
         /* 11 - احصائية بمتوسط عدد الشحنات التي تم تسليمها فى الموعد المحدد كنسبة  */
-        $shipment_average_deliverables = Shipment::where('shipment_status_id', 7)->whereDate('updated_at', now()->format('Y-m-d'))->count();
+        $shipment_average_deliverables = Shipment::where([['shipment_status_id', 7],['admin_id',$this->idAdmin()]])->whereDate('updated_at', now()->format('Y-m-d'))->count();
 
-        $shipment_averages = Shipment::where('shipment_status_id', 7)->get()->filter(function ($shipment_average) {
+        $shipment_averages = Shipment::where([['shipment_status_id', 7],['admin_id',$this->idAdmin()]])->get()->filter(function ($shipment_average) {
 
             return $shipment_average->updated_at->format('Y-m-d') == $shipment_average->delivery_date;
         })->count();
@@ -99,9 +100,9 @@ class TotalAccountController extends Controller
         $total_shipment_average_deliverables = ($shipment_average_deliverables * $shipment_averages) / 100;
 
         /* 12 - احصائية بمتوسط عدد الشحنات التي لم يتم تسليمها فى الموعد المحدد كنسبة   */
-        $shipment_average_deliverables_no = Shipment::where('shipment_status_id', 7)->whereDate('updated_at', now()->format('Y-m-d'))->count();
+        $shipment_average_deliverables_no = Shipment::where([['shipment_status_id', 7],['admin_id',$this->idAdmin()]])->whereDate('updated_at', now()->format('Y-m-d'))->count();
 
-        $shipment_averages_no = Shipment::where('shipment_status_id', 7)->get()->filter(function ($shipment_average_no) {
+        $shipment_averages_no = Shipment::where([['shipment_status_id', 7],['admin_id',$this->idAdmin()]])->get()->filter(function ($shipment_average_no) {
 
             return $shipment_average_no->updated_at->format('Y-m-d') != $shipment_average_no->delivery_date;
         })->count();
@@ -142,85 +143,85 @@ class TotalAccountController extends Controller
     {
 
         $data = [];
-        $user_company = Company::find($id)->user;
+        $user_company = Company::where('admin_id',$this->idAdmin())->find($id)->user;
 
         /*-01احصائية باجمالي المتحصلات النقدية خلال يوم فتح الداش بورد */
-        $total_day_shipment = CompanyShipmentDetails::where('company_id', $id)->whereDate('created_at', now()->format('Y-m-d'))->sum('shipment_price');
+        $total_day_shipment = CompanyShipmentDetails::where([['company_id', $id],['admin_id',$this->idAdmin()]])->whereDate('created_at', now()->format('Y-m-d'))->sum('shipment_price');
 
         /* 02- احصائية بعدد الشحنات المطلوب تسليمها خلال يوم فتح الداش بورد */
 
         $shipment = Shipment::
-        where([['shipment_status_id', 6], ['sender_id', $user_company->id]])->whereDate('delivery_date', now()->format('Y-m-d'))->count();
+        where([['shipment_status_id', 6], ['sender_id', $user_company->id],['admin_id',$this->idAdmin()]])->whereDate('delivery_date', now()->format('Y-m-d'))->count();
 
 
         /* 03- احصائية بأجمالي ال COD  المستحقة لكل العملاء  */
-        $total_cod = CompanyShipmentDetails::where('company_id', $id)->whereDate('created_at', now()->format('Y-m-d'))->get();
+        $total_cod = CompanyShipmentDetails::where([['company_id', $id],['admin_id',$this->idAdmin()]])->whereDate('created_at', now()->format('Y-m-d'))->get();
         $total_price_cod = 0;
         foreach ($total_cod as $cod) {
             $total_price_cod += ($cod->shipment_price + $cod->shipment->shipping_price);
         }
         /* 05- احصائية بعدد العملاء لدي شركة الشحن */
         $conut_client = Client::whereHas('shipment', function ($q) use ($user_company) {
-            return $q->where('sender_id', '=', $user_company->id);
-        })->where('user_id', '!=', null)->count();
+            return $q->where([['sender_id', '=', $user_company->id],['admin_id',$this->idAdmin()]]);
+        })->where([['user_id', '!=', null],['admin_id',$this->idAdmin()]])->count();
 
         /*06- احصائية بعدد العملاء الجدد  */
         $conut_client_new = Client::
         whereHas('shipment', function ($q) use ($user_company) {
             $q->whereYear('created_at', now()->format('Y'))
                 ->whereMonth('created_at', now()->format('m'))
-                ->where([['user_id', '!=', null], ['sender_id', '=', $user_company->id]]);
+                ->where([['user_id', '!=', null], ['sender_id', '=', $user_company->id],['admin_id',$this->idAdmin()]]);
 
-        })->count();
+        })->wherecount();
 
         /* 07- احصائية بعدد المرتجعات فى نفس يوم فتح الداش بورد */
         $count_Shipment_return = Shipment::
         where(function ($q) use ($user_company) {
             $q->whereDate('updated_at', now()->format('Y-m-d'))
-                ->where([['shipment_status_id', 8], ['sender_id', $user_company->id]]);
+                ->where([['shipment_status_id', 8], ['sender_id', $user_company->id],['admin_id',$this->idAdmin()]]);
         })
             ->orWhere(function ($q) use ($user_company) {
                 $q->whereDate('updated_at', now()->format('Y-m-d'))
-                    ->where([['shipment_status_id', 9], ['sender_id', $user_company->id]]);
+                    ->where([['shipment_status_id', 9], ['sender_id', $user_company->id],['admin_id',$this->idAdmin()]]);
             })
             ->orWhere(function ($q) use ($user_company) {
                 $q->whereDate('updated_at', now()->format('Y-m-d'))
-                    ->where([['shipment_status_id', 10], ['sender_id', $user_company->id]]);
+                    ->where([['shipment_status_id', 10], ['sender_id', $user_company->id],['admin_id',$this->idAdmin()]]);
             })
             ->orWhere(function ($q) use ($user_company) {
                 $q->whereDate('updated_at', now()->format('Y-m-d'))
-                    ->where([['shipment_status_id', 11], ['sender_id', $user_company->id]]);
+                    ->where([['shipment_status_id', 11], ['sender_id', $user_company->id],['admin_id',$this->idAdmin()]]);
             })->count();
 
         /* 08 - احصائية بمتوسط التسليمات    */
         $count_Shipment_average = Shipment::
         where([['shipment_status_id', 7], ['sender_id', $user_company->id]])
-            ->orWhere([['shipment_status_id', 8], ['sender_id', $user_company->id]])
-            ->orWhere([['shipment_status_id', 10], ['sender_id', $user_company->id]])->count();
+            ->orWhere([['shipment_status_id', 8], ['sender_id', $user_company->id],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id', 10], ['sender_id', $user_company->id],['admin_id',$this->idAdmin()]])->count();
 
         /* 09- احصائية باكثر المناطق طلب شحن */
         $max_shipping_area = Area::whereHas('shipment', function ($q) use ($user_company) {
             return $q->where('sender_id', '=', $user_company->id);
-        })->withCount('shipment')->orderBy('shipment_count', 'desc')->get()->where('shipment_count', '>', 0)->take(3);
+        })->withCount('shipment')->orderBy('shipment_count', 'desc')->get()->where([['shipment_count', '>', 0],['admin_id',$this->idAdmin()]])->take(3);
 
         /* 10  - احصائية باقل المناطق طلب شحن   */
         $min_shipping_area = Area::whereHas('shipment', function ($q) use ($user_company) {
             return $q->where('sender_id', '=', $user_company->id);
-        })->withCount('shipment')->orderBy('shipment_count', 'asc')->get()->where('shipment_count', '>', 0)->take(3);
+        })->withCount('shipment')->orderBy('shipment_count', 'asc')->get()->where([['shipment_count', '>', 0],['admin_id',$this->idAdmin()]])->take(3);
 
         /* 11 - احصائية بمتوسط عدد الشحنات التي تم تسليمها فى الموعد المحدد كنسبة  */
-        $shipment_average_deliverables = Shipment::where([['shipment_status_id', 7], ['sender_id', $user_company->id]])->whereDate('updated_at', now()->format('Y-m-d'))->count();
+        $shipment_average_deliverables = Shipment::where([['shipment_status_id', 7], ['sender_id', $user_company->id],['admin_id',$this->idAdmin()]])->whereDate('updated_at', now()->format('Y-m-d'))->count();
 
-        $shipment_averages = Shipment::where([['shipment_status_id', 7], ['sender_id', $user_company->id]])->get()->filter(function ($shipment_average) {
+        $shipment_averages = Shipment::where([['shipment_status_id', 7], ['sender_id', $user_company->id],['admin_id',$this->idAdmin()]])->get()->filter(function ($shipment_average) {
 
             return $shipment_average->updated_at->format('Y-m-d') == $shipment_average->delivery_date;
         })->count();
         $total_shipment_average_deliverables = ($shipment_average_deliverables * $shipment_averages) / 100;
 
         /* 12 - احصائية بمتوسط عدد الشحنات التي لم يتم تسليمها فى الموعد المحدد كنسبة   */
-        $shipment_average_deliverables_no = Shipment::where([['shipment_status_id', 7], ['sender_id', $user_company->id]])->whereDate('updated_at', now()->format('Y-m-d'))->count();
+        $shipment_average_deliverables_no = Shipment::where([['shipment_status_id', 7], ['sender_id', $user_company->id],['admin_id',$this->idAdmin()],['admin_id',$this->idAdmin()]])->whereDate('updated_at', now()->format('Y-m-d'))->count();
 
-        $shipment_averages_no = Shipment::where([['shipment_status_id', 7], ['sender_id', $user_company->id]])->get()->filter(function ($shipment_average_no) {
+        $shipment_averages_no = Shipment::where([['shipment_status_id', 7],['sender_id', $user_company->id],['admin_id',$this->idAdmin()]])->get()->filter(function ($shipment_average_no) {
 
             return $shipment_average_no->updated_at->format('Y-m-d') != $shipment_average_no->delivery_date;
         })->count();
@@ -264,31 +265,31 @@ class TotalAccountController extends Controller
 
         /* نسبة الشحنات  تسليم ناجح - 1 */
         $all_shipment = Shipment::count();
-        $stuts_7_shipment = Shipment::where('shipment_status_id', 7)->count();
+        $stuts_7_shipment = Shipment::where([['shipment_status_id', 7],['admin_id',$this->idAdmin()]])->count();
         $total_status_7 = $stuts_7_shipment / $all_shipment * 100;
 
         /* نسبة الشحنات المرتجعه  - 2 */
         $stuts_mortg3_shipment = Shipment::
-        where('shipment_status_id', 8)
-            ->orWhere('shipment_status_id', 9)
+        where([['shipment_status_id', 8],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id', 9],['admin_id',$this->idAdmin()]])
             ->count();
         $total_status_8_9 = $stuts_mortg3_shipment / $all_shipment * 100;
 
         /* نسبة الشحنات  فشل التسليم  - 3  */
         $stuts_fashal_shipment = Shipment::
-        where('shipment_status_id', 10)
-            ->orWhere('shipment_status_id', 11)
+        where([['shipment_status_id', 10],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id', 11],['admin_id',$this->idAdmin()]])
             ->count();
         $total_status_10_11 = $stuts_fashal_shipment / $all_shipment * 100;
 
         /* ⦁	نسبة الشحنات المؤجلة  - 4  */
         $stuts_moagla_shipment = Shipment::
-        where('shipment_status_id', 12)->count();
+        where([['shipment_status_id', 12],['admin_id',$this->idAdmin()]])->count();
         $total_status_12 = $stuts_moagla_shipment / $all_shipment * 100;
 
         /* ⦁	نسبة استلام ال pick up  - 5  */
         $stuts_pick_up_shipment = DetailShipmentRepresentative::
-        where('shipment_status_id', 3)
+        where([['shipment_status_id', 3],['admin_id',$this->idAdmin()]])
             ->count();
         $total_status_3 = $stuts_pick_up_shipment / $all_shipment * 100;
 
@@ -329,7 +330,7 @@ class TotalAccountController extends Controller
 
         $array = [];
         foreach ($data as $item) {
-            $array[] = Shipment::whereMonth('created_at', $item['month'])->whereYear('created_at', $item['year'])->count();
+            $array[] = Shipment::whereMonth('created_at', $item['month'])->whereYear('created_at', $item['year'])->where('admin_id',$this->idAdmin())->count();
         }
 
 
@@ -359,7 +360,7 @@ class TotalAccountController extends Controller
 
         $array = [];
         foreach ($data as $item) {
-            $array[] = Shipment::whereYear('created_at', $item['year'])->count();
+            $array[] = Shipment::whereYear('created_at', $item['year'])->where('admin_id',$this->idAdmin())->count();
         }
 
 //        return $array;
@@ -374,16 +375,16 @@ class TotalAccountController extends Controller
         $data = [];
 
         /* 1 عدد الاوردارات */
-        $month_total_shipment = Shipment::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->count();
+        $month_total_shipment = Shipment::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where('admin_id',$this->idAdmin())->count();
 
         /* 2 قيمة الاوردرات */
-        $month_total_shipment_price = Shipment::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->get()->sum('total_shipment');
+        $month_total_shipment_price = Shipment::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where('admin_id',$this->idAdmin())->get()->sum('total_shipment');
 
         /* 3 ⦁	ما تم توريدة */
-        $supplied_shipment = RepresentativeAccountDetail::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->count();
+        $supplied_shipment = RepresentativeAccountDetail::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where('admin_id',$this->idAdmin())->count();
 
         /* 4 ⦁	ما تم توريدة قيمة*/
-        $supplied_shipment_price = RepresentativeAccountDetail::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->sum('collection_balance');
+        $supplied_shipment_price = RepresentativeAccountDetail::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where('admin_id',$this->idAdmin())->sum('collection_balance');
 
         /* 5 ⦁	⦁	الاوردرات المستلمة*/
         $shipment_count_status_7 = RepresentativeAccountDetail::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where('shipment_status_id',7)->count();
@@ -392,8 +393,8 @@ class TotalAccountController extends Controller
         $shipment_count_status_10_11 = RepresentativeAccountDetail::
         whereYear('created_at', now()->format('Y'))
             ->whereMonth('created_at', now()->format('m'))
-            ->where('shipment_status_id',10)
-            ->orWhere('shipment_status_id',11)
+            ->where([['shipment_status_id',10],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id',11],['admin_id',$this->idAdmin()]])
             ->count();
 
         /* 1*/
@@ -422,22 +423,22 @@ class TotalAccountController extends Controller
         $month_total_shipment = Shipment::whereYear('created_at', now()->format('Y'))->count();
 
         /* 2 قيمة الاوردرات */
-        $month_total_shipment_price = Shipment::whereYear('created_at', now()->format('Y'))->get()->sum('total_shipment');
+        $month_total_shipment_price = Shipment::whereYear('created_at', now()->format('Y'))->where('admin_id',$this->idAdmin())->get()->sum('total_shipment');
 
         /* 3 ⦁	ما تم توريدة */
-        $supplied_shipment = RepresentativeAccountDetail::whereYear('created_at', now()->format('Y'))->count();
+        $supplied_shipment = RepresentativeAccountDetail::whereYear('created_at', now()->format('Y'))->where('admin_id',$this->idAdmin())->count();
 
         /* 4 ⦁	ما تم توريدة قيمة*/
-        $supplied_shipment_price = RepresentativeAccountDetail::whereYear('created_at', now()->format('Y'))->sum('collection_balance');
+        $supplied_shipment_price = RepresentativeAccountDetail::whereYear('created_at', now()->format('Y'))->where('admin_id',$this->idAdmin())->sum('collection_balance');
 
         /* 5 ⦁	⦁	الاوردرات المستلمة*/
-        $shipment_count_status_7 = RepresentativeAccountDetail::whereYear('created_at', now()->format('Y'))->count();
+        $shipment_count_status_7 = RepresentativeAccountDetail::whereYear('created_at', now()->format('Y'))->where('admin_id',$this->idAdmin())->count();
 
         /* 6 ⦁	⦁	الاوردرات المستلمة*/
         $shipment_count_status_10_11 = RepresentativeAccountDetail::
         whereYear('created_at', now()->format('Y'))
-            ->where('shipment_status_id',10)
-            ->orWhere('shipment_status_id',11)
+            ->where([['shipment_status_id',10],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id',11],['admin_id',$this->idAdmin()]])
             ->count();
 
         /* 1*/
@@ -463,10 +464,10 @@ class TotalAccountController extends Controller
         $data = [];
 
         /* 1⦁	احصائية باعداد العملاء */
-        $customer_count = Client::count();
+        $customer_count = Client::where('admin_id',$this->idAdmin())->count();
 
         /* 2 ⦁	احصائية باعداد العملاء الجدد */
-        $customer_count_now = Client::whereMonth('created_at', now()->format('m'))->count();
+        $customer_count_now = Client::whereMonth('created_at', now()->format('m'))->where('admin_id',$this->idAdmin())->count();
 
         /* 1 */
         $data[] = $customer_count;
@@ -485,19 +486,19 @@ class TotalAccountController extends Controller
         $data = [];
 
         /* نسبة الشحنات  تسليم ناجح - 1 */
-        $stuts_7_shipment = Shipment::where('shipment_status_id', 7)->count();
+        $stuts_7_shipment = Shipment::where([['shipment_status_id', 7],['admin_id',$this->idAdmin()]])->count();
 
         /* نسبة الشحنات المرتجعه  - 2 */
         $stuts_mortg3_shipment = Shipment::
         where('shipment_status_id', 8)
-            ->orWhere('shipment_status_id', 9)
-            ->orWhere('shipment_status_id', 10)
-            ->orWhere('shipment_status_id', 11)
+            ->orWhere([['shipment_status_id', 9],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id', 10],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id', 11],['admin_id',$this->idAdmin()]])
             ->count();
 
         /* ⦁	نسبة الشحنات المؤجلة  - 4  */
         $stuts_moagla_shipment = Shipment::
-        where('shipment_status_id', 12)->count();
+        where([['shipment_status_id', 12],['admin_id',$this->idAdmin()]])->count();
 
 
 
@@ -520,21 +521,21 @@ class TotalAccountController extends Controller
 
         $data = [];
 
-        $user_company = Company::find($id)->user;
+        $user_company = Company::where('admin_id',$this->idAdmin())->find($id)->user;
 
         /* نسبة الشحنات  تسليم ناجح - 1 */
-        $stuts_7_shipment = Shipment::where([['shipment_status_id', 7],['sender_id',$user_company->id]])->count();
+        $stuts_7_shipment = Shipment::where([['shipment_status_id', 7],['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])->count();
 
         /* نسبة الشحنات المرتجعه  - 2 */
         $stuts_mortg3_shipment = Shipment::
-        where([['shipment_status_id', 8],['sender_id',$user_company->id]])
-            ->orWhere([['shipment_status_id', 9],['sender_id',$user_company->id]])
+        where([['shipment_status_id', 8],['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id', 9],['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])
             ->count();
 
 
         /* ⦁	نسبة الشحنات المؤجلة  - 4  */
         $stuts_moagla_shipment = Shipment::
-        where([['shipment_status_id', 12],['sender_id',$user_company->id]])->count();
+        where([['shipment_status_id', 12],['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])->count();
 
 
         /* 1*/
@@ -557,30 +558,30 @@ class TotalAccountController extends Controller
 
         $data = [];
 
-        $user_company = Company::find($id)->user;
+        $user_company = Company::where('admin_id',$this->idAdmin())->find($id)->user;
 
         /* نسبة الشحنات  تسليم ناجح - 1 */
-        $all_shipment = Shipment::count();
-        $stuts_7_shipment = Shipment::where([['shipment_status_id', 7],['sender_id',$user_company->id]])->count();
+        $all_shipment = Shipment::where('admin_id',$this->idAdmin())->count();
+        $stuts_7_shipment = Shipment::where([['shipment_status_id', 7],['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])->count();
         $total_status_7 = $stuts_7_shipment / $all_shipment * 100;
 
         /* نسبة الشحنات المرتجعه  - 2 */
         $stuts_mortg3_shipment = Shipment::
-        where([['shipment_status_id', 8],['sender_id',$user_company->id]])
-            ->orWhere([['shipment_status_id', 9],['sender_id',$user_company->id]])
+        where([['shipment_status_id', 8],['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id', 9],['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])
             ->count();
         $total_status_8_9 = $stuts_mortg3_shipment / $all_shipment * 100;
 
         /* نسبة الشحنات  فشل التسليم  - 3  */
         $stuts_fashal_shipment = Shipment::
-        where([['shipment_status_id', 10],['sender_id',$user_company->id]])
-            ->orWhere([['shipment_status_id', 11],['sender_id',$user_company->id]])
+        where([['shipment_status_id', 10],['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id', 11],['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])
             ->count();
         $total_status_10_11 = $stuts_fashal_shipment / $all_shipment * 100;
 
         /* ⦁	نسبة الشحنات المؤجلة  - 4  */
         $stuts_moagla_shipment = Shipment::
-        where([['shipment_status_id', 12],['sender_id',$user_company->id]])->count();
+        where([['shipment_status_id', 12],['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])->count();
         $total_status_12 = $stuts_moagla_shipment / $all_shipment * 100;
 
 
@@ -605,7 +606,7 @@ class TotalAccountController extends Controller
 
         $month = now()->month;
         $year = now()->year;
-        $user_company = Company::find($id)->user;
+        $user_company = Company::where('admin_id',$this->idAdmin())->find($id)->user;
 
 
         $data[1] = ['month' => $month, 'year' => $year];
@@ -622,7 +623,7 @@ class TotalAccountController extends Controller
 
         $array = [];
         foreach ($data as $item) {
-            $array[] = Shipment::whereMonth('created_at', $item['month'])->whereYear('created_at', $item['year'])->where('sender_id',$user_company->id)->count();
+            $array[] = Shipment::whereMonth('created_at', $item['month'])->whereYear('created_at', $item['year'])->where([['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])->count();
         }
 
 
@@ -638,7 +639,7 @@ class TotalAccountController extends Controller
 
 //        $month = now()->month;
         $year = now()->year;
-        $user_company = Company::find($id)->user;
+        $user_company = Company::where('admin_id',$this->idAdmin())->find($id)->user;
 
 
         $data[1] = [ 'year' => $year];
@@ -654,7 +655,7 @@ class TotalAccountController extends Controller
 
         $array = [];
         foreach ($data as $item) {
-            $array[] = Shipment::whereYear('created_at', $item['year'])->where('sender_id',$user_company->id)->count();
+            $array[] = Shipment::whereYear('created_at', $item['year'])->where([['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])->count();
         }
 
 //        return $array;
@@ -668,32 +669,32 @@ class TotalAccountController extends Controller
 
         $data = [];
 
-        $user_company = Company::find($id)->user;
+        $user_company = Company::where('admin_id',$this->idAdmin())->find($id)->user;
 
 
         /* 1 عدد الاوردارات */
         $month_total_shipment = Shipment::
-        whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where('sender_id',$user_company->id)->count();
+        whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where([['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])->count();
 
         /* 2 قيمة الاوردرات */
         $month_total_shipment_price = Shipment::
-        whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where('sender_id',$user_company->id)->get()->sum('total_shipment');
+        whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where([['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])->get()->sum('total_shipment');
 
         /* 3 ⦁	ما تم توريدة */
-        $supplied_shipment = CompanyShipmentDetails::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where('company_id',$id)->count();
+        $supplied_shipment = CompanyShipmentDetails::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where([['company_id',$id],['admin_id',$this->idAdmin()]])->count();
 
         /* 4 ⦁	ما تم توريدة قيمة*/
-        $supplied_shipment_price = CompanyShipmentDetails::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where('company_id',$id)->sum('shipment_price');
+        $supplied_shipment_price = CompanyShipmentDetails::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where([['company_id',$id],['admin_id',$this->idAdmin()]])->sum('shipment_price');
 
         /* 5 ⦁	⦁	الاوردرات المستلمة*/
-        $shipment_count_status_7 = CompanyShipmentDetails::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where([['shipment_status_id',7],['company_id',$id]])->count();
+        $shipment_count_status_7 = CompanyShipmentDetails::whereYear('created_at', now()->format('Y'))->whereMonth('created_at', now()->format('m'))->where([['shipment_status_id',7],['company_id',$id],['admin_id',$this->idAdmin()]])->count();
 
         /* 6 ⦁	⦁	الاوردرات المستلمة*/
         $shipment_count_status_10_11 = CompanyShipmentDetails::
         whereYear('created_at', now()->format('Y'))
             ->whereMonth('created_at', now()->format('m'))
-            ->where([['shipment_status_id',10],['company_id',$id]])
-            ->orWhere([['shipment_status_id',11],['company_id',$id]])
+            ->where([['shipment_status_id',10],['company_id',$id],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id',11],['company_id',$id],['admin_id',$this->idAdmin()]])
             ->count();
 
         /* 1*/
@@ -717,29 +718,29 @@ class TotalAccountController extends Controller
     public function Year_shipment_company($id){
 
         $data = [];
-        $user_company = Company::find($id)->user;
+        $user_company = Company::where('admin_id',$this->idAdmin())->find($id)->user;
 
 
         /* 1 عدد الاوردارات */
-        $month_total_shipment = Shipment::whereYear('created_at', now()->format('Y'))->where('sender_id',$user_company->id)->get()->count();
+        $month_total_shipment = Shipment::whereYear('created_at', now()->format('Y'))->where([['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])->get()->count();
 
         /* 2 قيمة الاوردرات */
-        $month_total_shipment_price = Shipment::whereYear('created_at', now()->format('Y'))->where('sender_id',$user_company->id)->get()->sum('total_shipment');
+        $month_total_shipment_price = Shipment::whereYear('created_at', now()->format('Y'))->where([['sender_id',$user_company->id],['admin_id',$this->idAdmin()]])->get()->sum('total_shipment');
 
         /* 3 ⦁	ما تم توريدة */
-        $supplied_shipment = CompanyShipmentDetails::whereYear('created_at', now()->format('Y'))->where('company_id',$id)->get()->count();
+        $supplied_shipment = CompanyShipmentDetails::whereYear('created_at', now()->format('Y'))->where([['company_id',$id],['admin_id',$this->idAdmin()]])->get()->count();
 
         /* 4 ⦁	ما تم توريدة قيمة*/
-        $supplied_shipment_price = CompanyShipmentDetails::whereYear('created_at', now()->format('Y'))->where('company_id',$id)->sum('shipment_price');
+        $supplied_shipment_price = CompanyShipmentDetails::whereYear('created_at', now()->format('Y'))->where([['company_id',$id],['admin_id',$this->idAdmin()]])->sum('shipment_price');
 
         /* 5 ⦁	⦁	الاوردرات المستلمة*/
-        $shipment_count_status_7 = CompanyShipmentDetails::whereYear('created_at', now()->format('Y'))->where('company_id',$id)->count();
+        $shipment_count_status_7 = CompanyShipmentDetails::whereYear('created_at', now()->format('Y'))->where([['company_id',$id],['admin_id',$this->idAdmin()]])->count();
 
         /* 6 ⦁	⦁	الاوردرات المستلمة*/
         $shipment_count_status_10_11 = CompanyShipmentDetails::
         whereYear('created_at', now()->format('Y'))
-            ->where([['shipment_status_id',10],['company_id',$id]])
-            ->orWhere([['shipment_status_id',11],['company_id',$id]])
+            ->where([['shipment_status_id',10],['company_id',$id],['admin_id',$this->idAdmin()]])
+            ->orWhere([['shipment_status_id',11],['company_id',$id],['admin_id',$this->idAdmin()]])
             ->count();
 
         /* 1*/
@@ -763,17 +764,17 @@ class TotalAccountController extends Controller
     public function  customer_company($id){
 
         $data = [];
-        $user_company = Company::find($id)->user;
+        $user_company = Company::where('admin_id',$this->idAdmin())->find($id)->user;
 
         /* 1⦁	احصائية باعداد العملاء */
         $customer_count = Client::whereHas('shipment', function ($q) use ($user_company) {
-            return $q->where('sender_id', '=', $user_company->id);
-        })->count();
+            return $q->where([['sender_id', '=', $user_company->id],['admin_id',$this->idAdmin()]]);
+        })->where('admin_id',$this->idAdmin())->count();
 
         /* 2 ⦁	احصائية باعداد العملاء الجدد */
         $customer_count_now = Client::whereMonth('created_at', now()->format('m'))->whereHas('shipment', function ($q) use ($user_company) {
-            return $q->where('sender_id', '=', $user_company->id);
-        })->count();
+            return $q->where([['sender_id', '=', $user_company->id],['admin_id',$this->idAdmin()]]);
+        })->where('admin_id',$this->idAdmin())->count();
 
         /* 1 */
         $data[] = $customer_count;

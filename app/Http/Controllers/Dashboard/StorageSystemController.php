@@ -115,14 +115,14 @@ class StorageSystemController extends Controller
     {
         $storage_system = StorageSystem::where('admin_id',$this->idAdmin())->findOrFail($id);
 
-        if (count($storage_system->provinces) > 0)
-        {
-            return response()->json("no delete",400);
-
-        }else{
+//        if (count($storage_system->provinces) > 0)
+//        {
+//            return response()->json("no delete",400);
+//
+//        }else{
 
             $storage_system->delete();
             return response()->json("deleted successfully");
-        }
+//        }
     }
 }

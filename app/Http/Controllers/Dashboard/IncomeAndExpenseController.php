@@ -37,24 +37,24 @@ class IncomeAndExpenseController extends Controller
 
             $date = Carbon::parse($request->payment_date);
             $income_and_expense = IncomeAndExpense::with('income','expense','treasury')->
-            where('treasurie_id',$request->treasurie_id)->
+            where([['treasurie_id',$request->treasurie_id],['admin_id',$this->idAdmin()]])->
             whereDate('payment_date',$date)->get();
 
         }elseif ($request->payment_date){
 
             $date = Carbon::parse($request->payment_date);
 
-            $income_and_expense = IncomeAndExpense::with('income','expense','treasury')->
+            $income_and_expense = IncomeAndExpense::with('income','expense','treasury')->where('admin_id',$this->idAdmin())->
             whereDate('payment_date',$date)->get();
 
         }elseif ($request->treasurie_id ){
 
             $income_and_expense = IncomeAndExpense::with('income','expense','treasury')->
-            where('treasurie_id',$request->treasurie_id)->get();
+            where([['treasurie_id',$request->treasurie_id],['admin_id',$this->idAdmin()]])->get();
 
         }else{
 
-            $income_and_expense = IncomeAndExpense::with('income','expense','treasury')->get();
+            $income_and_expense = IncomeAndExpense::where('admin_id',$this->idAdmin())->with('income','expense','treasury')->get();
         }
 
         return $this->returnData('income_and_expense', $income_and_expense, 'successfully');
@@ -67,7 +67,7 @@ class IncomeAndExpenseController extends Controller
 //        $index = 0;
         $incomes = IncomeAndExpense::with('income','expense','treasury')->where([
             ['income_id','!=',null],
-            ['treasurie_id',$id]])->get();
+            ['treasurie_id',$id],['admin_id',$this->idAdmin()]])->get();
 //        foreach ($incomes as $income)
 //        {
 //            $date[$index]['price'] = $income->price;
@@ -91,7 +91,7 @@ class IncomeAndExpenseController extends Controller
     public function index_expense($id)
     {
 
-        $and_expense = IncomeAndExpense::with('income','expense','treasury')->where([['expense_id','!=',null],['treasurie_id',$id]])->get();
+        $and_expense = IncomeAndExpense::with('income','expense','treasury')->where([['expense_id','!=',null],['treasurie_id',$id],['admin_id',$this->idAdmin()]])->get();
 //        $date = [];
 //        $index = 0;
 //        $and_expense = IncomeAndExpense::where([
@@ -120,7 +120,7 @@ class IncomeAndExpenseController extends Controller
     public function index()
     {
 
-        $income_and_expense = IncomeAndExpense::with('income','expense')->get();
+        $income_and_expense = IncomeAndExpense::where('admin_id',$this->idAdmin())->with('income','expense')->get();
 
         return $this->returnData('income_and_expense', $income_and_expense, 'successfully');
     }
@@ -164,7 +164,7 @@ class IncomeAndExpenseController extends Controller
             }else{
 
                 if ($request->expense_id){
-                    $total_amount = Treasury::find($request->treasurie_id);
+                    $total_amount = Treasury::where('admin_id',$this->idAdmin())->find($request->treasurie_id);
                     if ($total_amount->amount < $request->price){
                         return response()->json(['error'=>['amount is not enough المبلغ لا يكفي']],422);
 
@@ -215,7 +215,7 @@ class IncomeAndExpenseController extends Controller
      */
     public function destroy($id)
     {
-        $income_and_expense = IncomeAndExpense::find($id);
+        $income_and_expense = IncomeAndExpense::where('admin_id',$this->idAdmin())->find($id);
         $income_and_expense->destroy($id);
         return response()->json("deleted successfully");
     }

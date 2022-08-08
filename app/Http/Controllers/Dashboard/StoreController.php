@@ -133,8 +133,8 @@ class StoreController extends Controller
     {
         $store = Store::where('admin_id',$this->idAdmin())->find($id);
 
-        if (count($store->shipment) > 0 || count($store->shipmenttransfer) > 0 || count($store->employee) > 0 || count($store->stock) > 0 ){
-            return response()->json("no deleted ");
+        if (count($store->shipment) > 0 || $store->employee != null  ){
+            return response()->json("no deleted ",422);
 
         }else{
 

@@ -20,7 +20,7 @@ class CompanyShipmentDetailsController extends Controller
      */
     public function index()
     {
-        $company_account_detail = CompanyShipmentDetails::with('company')->latest()->paginate('20');
+        $company_account_detail = CompanyShipmentDetails::where('admin_id',$this->idAdmin())->with('company')->latest()->paginate('20');
         return $this->returnData('company_account_detail', $company_account_detail, 'successfully');
 
     }
@@ -29,27 +29,29 @@ class CompanyShipmentDetailsController extends Controller
     {
         $company_id =  auth()->user()->company->id;
 
-        $company_shipment_detail = CompanyShipmentDetails::with('company')->where('company_id',$company_id)->latest()->paginate('20');
+        $company_shipment_detail = CompanyShipmentDetails::where([['company_id',$company_id],['admin_id',$this->idAdmin()]])->latest()->paginate('20');
         return $this->returnData('company_shipment_detail', $company_shipment_detail, 'successfully');
 
     }
 
     public function index_detail($id)
     {
-        $company_detail = CompanyShipmentDetails::with('company','shipmentstatu','company_account','shipment')->where([['company_id',$id],['company_account_id',null]])->get();
+        $company_detail = CompanyShipmentDetails::with('company','shipmentstatu','company_account','shipment')
+            ->where([['company_id',$id],['company_account_id',null],['admin_id',$this->idAdmin()]])->get();
         return $this->returnData('company_detail', $company_detail, 'successfully');
     }
     public function index_account($id)
     {
 
-        $account_detail = CompanyShipmentDetails::with('company','shipmentstatu','company_account','shipment')->where([['company_id',$id],['company_account_id','!=',null]])->get();
+        $account_detail = CompanyShipmentDetails::with('company','shipmentstatu','company_account','shipment')->
+        where([['company_id',$id],['company_account_id','!=',null],['admin_id',$this->idAdmin()]])->get();
         return $this->returnData('account_detail', $account_detail, 'successfully');
 
     }
 
     public function total_account($id)
     {
-        $total_account = CompanyAccount::with('company_shipment_details')->where('company_id',$id)->get();
+        $total_account = CompanyAccount::with('company_shipment_details')->where([['company_id',$id],['admin_id',$this->idAdmin()]])->get();
         return $this->returnData('total_account', $total_account, 'successfully');
 
     }
@@ -83,6 +85,8 @@ class CompanyShipmentDetailsController extends Controller
                 'company_id' => $request->company_id,
                 'shipment_id' => $request->shipment_id,
                 'company_account_id' => $request->company_account_id,
+                'admin_id' => $this->idAdmin(),
+
 
 
             ]);
@@ -129,12 +133,13 @@ class CompanyShipmentDetailsController extends Controller
             {
                 return $this->returnError('errors', $validation->errors());
             }
-            $company_shipment_detail = CompanyShipmentDetails::findOrFail($id);
+            $company_shipment_detail = CompanyShipmentDetails::where('admin_id',$this->idAdmin())->findOrFail($id);
 
             $company_shipment_detail->shipment_price = $request->shipment_price;
             $company_shipment_detail->company_id = $request->company_id;
             $company_shipment_detail->shipment_id = $request->shipment_id;
             $company_shipment_detail->company_account_id = $request->company_account_id;
+            $company_shipment_detail->admin_id = $this->idAdmin()??$this->idAdmin();
 
             $company_shipment_detail->update();
 
@@ -154,7 +159,7 @@ class CompanyShipmentDetailsController extends Controller
      */
     public function destroy($id)
     {
-        $company_shipment_detail = CompanyShipmentDetails::findOrFail($id);
+        $company_shipment_detail = CompanyShipmentDetails::where('admin_id',$this->idAdmin())->findOrFail($id);
 
         $company_shipment_detail->delete();
         return response()->json("deleted successfully");

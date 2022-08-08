@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Area;
+use App\Models\Company;
 use App\Models\CompanyShippingAreaPrice;
 use App\Models\ShippingAreaPrice;
 use App\Models\Weight;
@@ -52,7 +53,7 @@ class ImportExportController extends Controller
 
             Excel::import(new ImportShipment, $request->file('file'));
 
-            $importshipmentt = ImportShipmentt::where([['end', 0],[]])->get();
+            $importshipmentt = ImportShipmentt::where('end', 0)->get();
             // return $importshipmentt;
 
 
@@ -61,7 +62,7 @@ class ImportExportController extends Controller
                 foreach ($importshipmentt as $import) {
 
 
-                    $client = Client::where([['phone', $import['phone']],[$this->idAdmin()]])->first();
+                    $client = Client::where('phone', $import['phone'])->first();
 
                     if ($client) {
 
@@ -88,6 +89,8 @@ class ImportExportController extends Controller
                         ]);
 
                     }
+                    $company = Company::where([['user_id',$user_id],['admin_id',$this->idAdmin()]])->first();
+
 
 //                    where('admin_id',$this->idAdmin())->
                     $area = Area::where([['name', $import['area']],['admin_id', $import[$this->idAdmin()]]])->first();
@@ -118,7 +121,7 @@ class ImportExportController extends Controller
                     $weight = Weight::where('admin_id', $this->idAdmin())->first();
 
 
-                    $weight_company = WeightCompany::where([['company_id',$user_id],['admin_id', $this->idAdmin()]])->first();
+                    $weight_company = WeightCompany::where([['company_id',$company->id],['admin_id', $this->idAdmin()]])->first();
                     $weight_price = 0;
 
                     if ($weight_company){
@@ -137,7 +140,7 @@ class ImportExportController extends Controller
 
                     $shipping_area_price = ShippingAreaPrice::where([['area_id',$area->id],['admin_id', $this->idAdmin()]])->first();
 
-                    $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id',$user_id],['area_id',$area->id],['admin_id', $this->idAdmin()]])->first();
+                    $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id',$company->id],['area_id',$area->id],['admin_id', $this->idAdmin()]])->first();
 
                     $transportation_price_shipping = 0;
 

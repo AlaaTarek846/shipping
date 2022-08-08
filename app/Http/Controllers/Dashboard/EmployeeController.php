@@ -342,7 +342,7 @@ class EmployeeController extends Controller
             return response()->json($errors,422);
         }
 
-        $user = User::findOrFail($request->user_id);
+        $user = User::where('admin_id',$this->idAdmin())->findOrFail($request->user_id);
         $user->syncRoles([$request->role_id]);
 
 //        return $this->returnData('employee', $employee, 'successfully');

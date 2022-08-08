@@ -49,14 +49,11 @@ class WeightCompanyController extends Controller
             $weight_company =  WeightCompany::where([['company_id',$request->company_id],['admin_id',$this->idAdmin()]])->first();
             if($weight_company){
                 $weight_company->update([
-
                     'type' => $request->type,
                     'limit' => $request->limit,
                     'price' => $request->price,
                     'company_id' => $request->company_id,
                     'admin_id' => $this->idAdmin(),
-
-
                 ]);
             }else{
 

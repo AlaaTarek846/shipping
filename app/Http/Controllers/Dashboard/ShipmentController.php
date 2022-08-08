@@ -34,6 +34,7 @@ class ShipmentController extends Controller
     public function edit_representative($id)
     {
 
+
         $RepresentativeAccountDetail = RepresentativeAccountDetail::where([
             ['representative_account_id', "!=", NULL],
             ['representative_id', $id],
@@ -41,10 +42,20 @@ class ShipmentController extends Controller
         ])->get()->pluck('shipment_id')->toArray();
 
         $shipment = Shipment::with('area', 'client', 'representative', 'serviceType', 'shipmentstatu', 'additionalservice', 'store', 'user')
-            ->where([['representative_id', $id],['admin_id',$this->idAdmin()]])->whereNotIn('id', $RepresentativeAccountDetail)->get();
+            ->where('representative_id', $id)->whereNotIn('id', $RepresentativeAccountDetail)->get();
+        $total_cod = Shipment::with('area', 'client', 'representative', 'serviceType', 'shipmentstatu', 'additionalservice', 'store', 'user')
+            ->where('representative_id', $id)->whereNotIn('id', $RepresentativeAccountDetail)->get()->sum('total_shipment');
 
 
-        return $this->returnData('shipment', $shipment, 'successfully');
+        $data = [];
+        $data['shipment'] = $shipment;
+        $data['total_cod'] = $total_cod;
+
+
+        return $this->returnData('data', $data, 'successfully');
+
+
+//        return $this->returnData('shipment', $shipment, 'successfully');
 
 
 //        return $this->returnData('shipment', $shipment, 'successfully');
@@ -232,7 +243,7 @@ class ShipmentController extends Controller
 
             $weight = Weight::where('admin_id',$this->idAdmin())->first();
 
-            $weight_company = WeightCompany::where([['company_id', $request->sender_id],['admin_id',$this->idAdmin()]])->first();
+            $weight_company = WeightCompany::where([['company_id', auth()->user()->company->id],['admin_id',$this->idAdmin()]])->first();
             $weight_price = 0;
 
             if ($weight_company) {
@@ -248,7 +259,7 @@ class ShipmentController extends Controller
             //      ================= calculator  shipping price
 
             $shipping_area_price = ShippingAreaPrice::where([['area_id', $request->area_id],['admin_id',$this->idAdmin()]])->first();
-            $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id', $request->sender_id], ['area_id', $request->area_id],['admin_id',$this->idAdmin()]])->first();
+            $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id', auth()->user()->company->id], ['area_id', $request->area_id],['admin_id',$this->idAdmin()]])->first();
             $transportation_price_shipping = 0;
 
             if ($company_shipping_area_price) {
@@ -338,7 +349,7 @@ class ShipmentController extends Controller
         try {
 
             foreach ($request->all() as $key => $value)
-                $request->merge([$key => $value == "undefined" ? null : $value]);
+                $request->merge([$key => $value == "undefined" || $value == "null" ? null : $value]);
 
 //            $data = collect($request->all())->filter()->toArray();
 //            return $data;
@@ -449,7 +460,7 @@ class ShipmentController extends Controller
 
             $weight = Weight::where('admin_id',$this->idAdmin())->first();
 
-            $weight_company = WeightCompany::where([['company_id', $request->sender_id],['admin_id',$this->idAdmin()]])->first();
+            $weight_company = WeightCompany::where([['company_id', auth()->user()->company->id],['admin_id',$this->idAdmin()]])->first();
             $weight_price = 0;
 
             if ($weight_company) {
@@ -465,7 +476,7 @@ class ShipmentController extends Controller
             //      ================= calculator  shipping price
 
             $shipping_area_price = ShippingAreaPrice::where([['area_id', $request->area_id],['admin_id',$this->idAdmin()]])->first();
-            $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id', $request->sender_id], ['area_id', $request->area_id]])->first();
+            $company_shipping_area_price = CompanyShippingAreaPrice::where([['company_id', auth()->user()->company->id], ['area_id', $request->area_id]])->first();
             $transportation_price_shipping = 0;
 
             if ($company_shipping_area_price) {
@@ -627,7 +638,7 @@ class ShipmentController extends Controller
                     $shipment = RepresentativeAccountDetail::where('admin_id',$this->idAdmin())->find($shipment_id);
 
                     if (!$shipment) {
-                        $shipment = Shipment::where('admin_id',$this->idAdmin())->find($shipment_id);
+                        $shipment = Shipment::where([['admin_id',$this->idAdmin()],['id'.$shipment_id]])->find($shipment_id);
                         if ($shipment) {
                             $shipment->update([
                                 'representative_id' => $request->representative_id,
@@ -660,13 +671,23 @@ class ShipmentController extends Controller
     {
         $shipment = Shipment::where('admin_id',$this->idAdmin())->find($id);
 
-        if (count($shipment->shipmenttransfer) > 0 || count($shipment->stock_detail) > 0 || count($shipment->company_shipment_details) > 0 || count($shipment->representative_account_detail) > 0) {
-            return response()->json("no delete", 400);
+        if($shipment->shipment_status_id == 1 || $shipment->shipment_status_id == 2 || $shipment->shipment_status_id == 3 || $shipment->shipment_status_id ==  4 || $shipment->shipment_status_id == 5){
 
-        } else {
-
-            $shipment->destroy($id);
+//            $shipment->destroy($id);
+            $shipment->delete();
             return response()->json('deleted successfully');
+
+        }else{
+
+//            if (count($shipment->shipmenttransfer) > 0 || count($shipment->stock_detail) > 0 || count($shipment->company_shipment_details) > 0 || count($shipment->representative_account_detail) > 0) {
+                return response()->json("no delete", 400);
+
+//            } else {
+//
+//                $shipment->destroy($id);
+//                return response()->json('deleted successfully');
+//            }
+
         }
 
 
